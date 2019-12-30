@@ -1,97 +1,9 @@
-surface.CreateFont("BadCoderzRETARD", {
-size = ScrH() * 80 / 1440,
-	weight = 2000,
-	shadow = false,
-	font = "Trebuchet MS",
-	outline = true
-})
-
-
-local soundtbl = {
-	"vo/k_lab/kl_ahhhh.wav",
-	"vo/npc/male01/runforyourlife03.wav",
-	"vo/outland_02/sheckley_idiot02.wav",
-	"vo/k_lab/ba_sarcastic01.wav",
-	"vo/k_lab/ba_sarcastic03.wav",
-	"vo/npc/barney/ba_pain01.wav",
-	"vo/citadel/br_mock04.wav",
-	"vo/npc/female01/answer21.wav",
-	"vo/streetwar/alyx_gate/al_gordonrun.wav",
-	"ambient/voices/f_scream1.wav",
-	"vo/ravenholm/monk_death07.wav",
-	"vo/npc/male01/no01.wav",
-	"vo/k_lab/kl_heremypet02.wav",
-	"vo/novaprospekt/al_nostop.wav",
-	"vo/citadel/br_youfool.wav",
-	"vo/novaprospekt/al_combinespy03.wav",
-	"vo/npc/barney/ba_damnit.wav",
-	"vo/citadel/al_notagain02.wav",
-	"vo/citadel/br_goback.wav",
-	"vo/streetwar/sniper/ba_heycomeon.wav"}
-
-
-local texttbl = {
-
-"S T O P   E D I T I N G   T H E   C O D E",
-"STOP TOUCHING THE CODE YOU SILLY GOOSE",
-"WELL PLAYED, YOU MANAGED TO BREAK THE ADDON BECAUSE YOU DIDN'T READ SHIT",
-"*CLAP* *CLAP*",
-"YER A PRO LUA CODER, WELL PLAYED",
-"STOP EDITING THE CODE YOU FOOL",
-"THERE IS NO CONFIG IN THE ADDON SO STOP EDITING THE CODE",
-"REVERT THE CHANGES YOU DID ON THE CODE YOU FOOL",
-"PUT BACK THE STEAMID64 YOU EDITED TO WHAT IT WAS",
-"YOU SILLY GOOSE"
-}
-
-
-if BadCoderz.owner ~= "{{ user_id }}" then
-	local ncount = 1
-
-	concommand.Add("BadCoderz", function()
-		if game.SinglePlayer() then
-			LocalPlayer():ChatPrint("SinglePlayer isn't supported at least be connected to steam and start a local server in lan.")
-
-			return
-		end
-
-		if LocalPlayer():SteamID64() ~= BadCoderz.owner and LocalPlayer():SteamID64() ~= "{{ user_id }}" then return end
-
-		timer.Create("BadCoderzRetard", 0.6, 40, function()
-			local _ncount = ncount
-			local text = table.Random(texttbl)
-			surface.SetFont("BadCoderzRETARD")
-			local width, height = surface.GetTextSize(text)
-			local x = math.random(0, ScrW() - width)
-			local y = math.random(0, ScrH() - height)
-			local hookname = "badcoderz_idiot" .. tostring(_ncount)
-
-			if _ncount % 2 == 0 then
-				surface.PlaySound(table.Random(soundtbl))
-			end
-
-			hook.Add("HUDPaint", hookname, function()
-				surface.SetTextColor((math.cos(CurTime() * 5) + 0.5) * 255, (math.sin(CurTime()) + 0.5) * 255, (math.sin(CurTime() / 2) + 0.5) * 255)
-				surface.SetTextPos(x, y)
-				surface.SetFont("BadCoderzRETARD")
-				surface.DrawText(text)
-
-				timer.Simple(3, function()
-					hook.Remove("HUDPaint", hookname)
-				end)
-			end)
-
-			ncount = ncount + 1
-		end)
-	end)
-end
 
 local color_green = Color(65, 200, 0, 255)
-
 surface.CreateFont("BadCoderzHACK", {
 	font = "Courier New",
 	extended = false,
-	size = ScrH() * 23 / 1440,
+	size = ScrH()*23/1440,
 	weight = 0,
 	blursize = 0,
 	scanlines = 0,
@@ -105,6 +17,7 @@ surface.CreateFont("BadCoderzHACK", {
 	additive = false,
 	outline = false
 })
+
 local ASCII = [[
 
 ▀█████████▄     ▄████████ ████████▄   ▄████████  ▄██████▄  ████████▄     ▄████████    ▄████████  ▄███████▄  

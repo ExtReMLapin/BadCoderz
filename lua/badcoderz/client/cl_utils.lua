@@ -191,7 +191,7 @@ function BadCoderz.populateTreeWithData(treePanel, dataTbl, client)
 								iconCallHistory = "icon16/clock.png"
 							end
 
-							local _endNode = callLineNode:AddNode( "#" .. k .. " File:" .. location.location .. ", Line #" .. location.line, iconCallHistory)
+							local _endNode = callLineNode:AddNode( "#".. k .. " File:" .. location.location .. ", Line #" .. location.line, iconCallHistory)
 
 							_endNode.DoRightClick = function(pnl)
 								if client and not file.Exists(fixedName, "LUA") then

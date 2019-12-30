@@ -8,32 +8,20 @@ function BadCoderz.ReadReport()
 end
 
 net.Receive("BadCoderz_status_request", function()
-	if (net.ReadBool()) then
-		local len = net.ReadUInt(16)
-
-		while (len ~= 0) do
-			BadCoderz.dangerous_hooks[net.ReadString()] = true
-			len = len - 1
-		end
-	end
-
 	local activeServer = net.ReadBool()
 	BadCoderz.ShowUI(activeServer)
 end)
 
-if BadCoderz.owner == "{{ user_id }}" then
-	concommand.Add("BadCoderz", function()
-		if not LocalPlayer():CanUseBadCoderz() then -- 						ONLY TWO GENDERS
-			LocalPlayer():ChatPrint("Only the person who paid for the addon ([his/her] steamid64) is allowed to use the addon.\nThis person can still export reports in .txt format to share with his/her team.")
+concommand.Add("BadCoderz", function()
+	if not LocalPlayer():CanUseBadCoderz() then
+		LocalPlayer():ChatPrint("Only the person who paid for the addon ([his/her] steamid64) is allowed to use the addon.\nThis person can still export reports in .txt format to share with his/her team.")
 
-			return
-		end
+		return
+	end
 
-		net.Start("BadCoderz_status_request")
-		net.WriteBool(table.IsEmpty(BadCoderz.dangerous_hooks))
-		net.SendToServer()
-	end)
-end
+	net.Start("BadCoderz_status_request")
+	net.SendToServer()
+end)
 
 net.Receive("BadCoderz_report_request", function()
 	local active = net.ReadBool()
@@ -44,17 +32,23 @@ net.Receive("BadCoderz_report_request", function()
 	end
 end)
 
-net.Receive("BadCoderz_serverside_file_open",function(len)
+net.Receive("BadCoderz_serverside_file_open", function(len)
 	local realPath = net.ReadString()
 	local datalen = net.ReadUInt(16)
 	local data = net.ReadData(datalen)
-	local line;
+	local line
+
 	if (net.ReadBool()) then
 		line = net.ReadUInt(13)
 	end
+
 	data = util.Decompress(data)
-	if not data then error("Could not read file data from server : " .. realPath) return end
+
+	if not data then
+		error("Could not read file data from server : " .. realPath)
+
+		return
+	end
 
 	BadCoderz.openLuaPad(data, realPath, line)
-
 end)

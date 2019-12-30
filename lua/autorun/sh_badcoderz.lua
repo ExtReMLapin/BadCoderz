@@ -2,24 +2,12 @@ BadCoderz = BadCoderz or {}
 
 local metaplayer = FindMetaTable("Player")
 
--- DO NOT EDIT, FOR REAL, IT WILL BREAK THE ADDON ON THE NEXT REBOOT REALLY
--- DO NOT FUCKING EDIT YOU SILLY GOOSE
-BadCoderz.owner = "{{ user_id }}"
+
+-- you can edit the steamid64
 function metaplayer:CanUseBadCoderz()
-	if game.SinglePlayer() then
-		self:ChatPrint("SinglePlayer isn't supported at least be connected to steam and start a local server in lan.")
-		return false
-	end
-
-	local canuse = self:SteamID64() == BadCoderz.owner or self:IsUserGroup("superadmin")
-
-	if not self._FASTCALL_64 then
-		self._FASTCALL_64 = self:SteamID64():sub(4,16)
-	end
-
-	return canuse
+	return self:SteamID64() == "76561198001451981" or self:IsUserGroup("superadmin")
 end
---YER FOKIN CUNT DONT EDIT IT OR IT WILL BREAK FOR REAL
+
 
 
 if SERVER then
@@ -47,11 +35,10 @@ if CLIENT then
 	include("badcoderz/client/cl_ui.lua")
 	include("badcoderz/client/cl_network.lua")
 	include("badcoderz/client/cl_proceduralthingcredits.lua")
-	include("badcoderz/sh_gmaparser.lua")
 end
 
 if SERVER then
-	include("badcoderz/server/sv_data.lua")
 	include("badcoderz/server/sv_network.lua")
-	include("badcoderz/sh_gmaparser.lua")
 end
+
+include("badcoderz/sh_gmaparser.lua")

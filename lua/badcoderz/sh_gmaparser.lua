@@ -27,7 +27,7 @@ local function parseFileList(gma_path)
 
 	while (true) do
 		local finenum = gma:ReadLong()
-		if (finenum == 0) then break end -- best 2019 hack
+		if (finenum == 0) then break end -- 2019 hack
 		local fileName = nextzero(gma, true)
 
 		if string.EndsWith(fileName, ".lua") then

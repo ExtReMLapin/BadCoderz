@@ -1,21 +1,18 @@
 local reports = {}
 local function do_report(func, hookname, lines, parentFuncs)
-
-	local nLines = #lines
 	reports[func] = reports[func] or {}
 	reports[func][hookname] = reports[func][hookname] or {}
-	reports[func][hookname][lines[nLines].location] = reports[func][hookname][lines[nLines].location] or {}
+	reports[func][hookname][lines[#lines].location] = reports[func][hookname][lines[#lines].location] or {}
 
-	if not reports[func][hookname][lines[nLines].location][lines[nLines].line] then
-
-		reports[func][hookname][lines[nLines].location][lines[nLines].line] = {}
-		reports[func][hookname][lines[nLines].location][lines[nLines].line].calls = 1
-		reports[func][hookname][lines[nLines].location][lines[nLines].line].lines = lines
-		reports[func][hookname][lines[nLines].location][lines[nLines].line].funcs = parentFuncs
+	if not reports[func][hookname][lines[#lines].location][lines[#lines].line] then
+		reports[func][hookname][lines[#lines].location][lines[#lines].line] = {
+			calls = 1,
+			lines = lines,
+			funcs = parentFuncs
+		}
 	else
-		reports[func][hookname][lines[nLines].location][lines[nLines].line].calls = reports[func][hookname][lines[nLines].location][lines[nLines].line].calls + 1
+		reports[func][hookname][lines[#lines].location][lines[#lines].line].calls = reports[func][hookname][lines[#lines].location][lines[#lines].line].calls + 1
 	end
-
 end
 
 function BadCoderz.getReport()
@@ -217,6 +214,9 @@ end
 
 
 local function start_scan()
+	jit.off()
+	jit.flush()
+
 	hook.Add("Think", "badCoderzTrapHook", initScan)
 	BadCoderz.test_running = true
 	reports = {}
@@ -228,6 +228,7 @@ local function start_scan()
 end
 
 local function stop_scan()
+	jit.on()
 	BadCoderz.test_running = false
 	debug.sethook(_hook, "")
 end

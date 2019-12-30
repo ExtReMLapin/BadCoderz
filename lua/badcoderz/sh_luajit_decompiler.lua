@@ -8,7 +8,7 @@ local instructions_db = {
 
 local function disassemble_function(fn)
 	local upvalues = {}
-	local n = 0
+	n = 0
 	local upvalue = jit.util.funcuvname(fn, n)
 	while (upvalue ~= nil) do
 		upvalues[n] = upvalue
@@ -36,12 +36,18 @@ local function disassemble_function(fn)
 
 	while (n < countBC) do
 		local ins = jit.util.funcbc(fn, n)
-		local instruction = {}
-		instruction.C = bit.rshift(bit.band(ins, 0x00ff0000), 16)
+		local instruction = {
+			C = bit.rshift(bit.band(ins, 0x00ff0000), 16),
+			B = bit.rshift(ins, 24),
+			A = bit.rshift(bit.band(ins, 0x0000ff00), 8),
+			D = bit.rshift(ins, 16),
+			OP_CODE = bit.band(ins, 0xFF)
+		}
+		--[[instruction.C = bit.rshift(bit.band(ins, 0x00ff0000), 16)
 		instruction.B = bit.rshift(ins, 24)
 		instruction.A = bit.rshift(bit.band(ins, 0x0000ff00), 8)
 		instruction.D = bit.rshift(ins, 16)
-		instruction.OP_CODE = bit.band(ins, 0xFF)
+		instruction.OP_CODE = bit.band(ins, 0xFF)]]
 		instructions[n] = instruction
 		n = n + 1
 	end
@@ -78,12 +84,6 @@ function BadCoderz.find_color_call_static_args(fn)
 	end
 
 	if (table.Count(targeted_consts) == 0) and (table.Count(targeted_upvalues) == 0) then
-		--[[print("infos :")
-		PrintTable(debug.getinfo(fn))
-
-		print("consts : ")
-		PrintTable(disassembled_code.consts)]]
-
 		return false, "Not found in const"
 	end
 

@@ -518,7 +518,6 @@ function BadCoderz.Credits()
 			return
 		end
 
-		timer.Remove("hackingGmodStore")
 		music:Stop()
 	end
 end

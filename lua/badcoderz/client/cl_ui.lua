@@ -426,7 +426,7 @@ function BadCoderz.ShowUI(ongoingServerScan)
 
 	local secretbutton = TDLib("DButton", DermaBadCoderz)
 	secretbutton:SetSize(DermaBadCoderz:GetWide() - mainHolder:GetWide() - holderbordel-1, buttonh)
-	secretbutton:SetPos(1,DermaBadCoderz:GetTall()-buttonh*2-1)
+	secretbutton:SetPos(1,DermaBadCoderz:GetTall()-buttonh-1)
 
 	secretbutton:SetText("")
 	secretbutton:ClearPaint()
@@ -440,18 +440,6 @@ function BadCoderz.ShowUI(ongoingServerScan)
 		pnl:GetParent():Close()
 		BadCoderz.Credits()
 	end
-																																																		-- don't bother removing this from gmodstore, it's going to be released for free on github anyway
-																																																		local noUpdate = TDLib("DButton", DermaBadCoderz)
-																																																		noUpdate:SetSize(DermaBadCoderz:GetWide() - mainHolder:GetWide() - holderbordel-1, buttonh)
-																																																		noUpdate:SetPos(1,DermaBadCoderz:GetTall() - buttonh-1)
-
-																																																		noUpdate:SetText("")
-																																																		noUpdate:ClearPaint()
-
-																																																		:Background(color_white)
-																																																		:CircleHover(color_button_fade)
-																																																		:Text("No more updates", "BadCoderzFont1", color_black, TEXT_ALIGN_CENTER, 5)
-																																																		:SetOpenURL("https://gist.github.com/ExtReMLapin/5a7779e7ced431d1ba9a6a12b3b577b0")
 
 	if not ongoingServerScan then
 		buttonClientside:DoClick()

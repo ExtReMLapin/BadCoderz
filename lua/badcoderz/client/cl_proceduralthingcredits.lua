@@ -51,7 +51,7 @@ local ASCII = [[
 ]]
 
 
-local purchasers = {
+local credits = {
 "Nux [76561197962571798]",
 "Riddick [76561197963098122]",
 "Alexander Ivanov [76561197971459535]",
@@ -398,7 +398,7 @@ local purchasers = {
 local posTbl = {}
 
 local proGamer = nil
-for k, v in ipairs(purchasers) do
+for k, v in ipairs(credits) do
 	if not proGamer and string.find(v, LocalPlayer():SteamID64()) then proGamer = k end
 	surface.SetFont("BadCoderzHACK")
 	local w, h = surface.GetTextSize(v)
@@ -448,7 +448,7 @@ local function flagdraw(startTime)
 
 	surface.SetTextColor(Color(65, 200, 0, math.Remap(CurTime(), startTime, startTime + timedown, 0, 255)))
 
-	for k, v in ipairs(purchasers) do
+	for k, v in ipairs(credits) do
 		if k == proGamer then continue end
 		local timeChange1 = math.cos(CurTime() + k * k / 2) * 20
 		local timeChange2 = math.sin(CurTime() + k * k / 5) * 80
@@ -468,7 +468,7 @@ local function flagdraw(startTime)
 		local timeChange1 = math.cos(CurTime() + proGamer * proGamer / 2) * 20
 		local timeChange2 = math.sin(CurTime() + proGamer * proGamer / 5) * 80
 		surface.SetTextPos(posTbl[proGamer][1] + timeChange1, posTbl[proGamer][2] - timeChange2)
-		surface.DrawText(purchasers[proGamer])
+		surface.DrawText(credits[proGamer])
 	end
 end
 

@@ -1,6 +1,7 @@
 # BadCoderz
 ### Find unoptimized addons and KILL the devs who made them
 
+[Workshop page](https://steamcommunity.com/sharedfiles/filedetails/?id=1955436281)
 
 [English video](https://www.youtube.com/watch?v=TVT5k3CHPQQ)
 

@@ -325,13 +325,6 @@ function BadCoderz.ShowUI(ongoingServerScan)
 		mainHolder:Clear()
 		mainHolder:ClearPaint():Background(color_light_grey):SideBlock(curcolor, 6, LEFT)
 
-			/*
-			BadCoderz.settings.auto_close_menu
-			BadCoderz.settings.auto_reopen_menu
-			BadCoderz.settings.auto_reopen_menu_time*
-			*/
-
-
 			local CheckBoxAutoClose = TDLib( "DCheckBoxLabel", mainHolder )
 			CheckBoxAutoClose:SetPos( 35, 50 )
 			CheckBoxAutoClose:SetText( "")

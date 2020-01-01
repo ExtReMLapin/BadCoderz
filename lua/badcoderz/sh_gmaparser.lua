@@ -43,7 +43,7 @@ local function parseFileList(gma_path)
 end
 
 local function buildDataBase()
-	for k, v in ipairs(engine.GetAddons()) do
+	for _, v in ipairs(engine.GetAddons()) do
 		if v.mounted == false then continue end
 		local fileList = parseFileList(v.file)
 		BadCoderz.GMA_DB[v.file] = fileList

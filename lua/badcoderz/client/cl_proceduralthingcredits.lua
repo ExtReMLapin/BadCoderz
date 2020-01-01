@@ -395,16 +395,8 @@ local credits = {
 "Lapin/LPN64 [76561198001451981]"
 }
 
-local posTbl = {}
-
-local proGamer = nil
-for k, v in ipairs(credits) do
-	if not proGamer and string.find(v, LocalPlayer():SteamID64()) then proGamer = k end
-	surface.SetFont("BadCoderzHACK")
-	local w, h = surface.GetTextSize(v)
-	posTbl[k] = {math.random(0, ScrW()-w), math.random(h, ScrH()-h)}
-end
-
+local posTbl
+local proGamer
 
 local bdctbl = {utf8.codepoint(ASCII, 1, -1)}
 local bdcchartbl = {}
@@ -476,6 +468,17 @@ function BadCoderz.Credits()
 	if BadCoderz.DermaCredits and IsValid(BadCoderz.DermaCredits) then
 		BadCoderz.DermaCredits:Close()
 	end
+	posTbl = {}
+
+	proGamer = nil
+	for k, v in ipairs(credits) do
+		if not proGamer and string.find(v, LocalPlayer():SteamID64()) then proGamer = k end
+		surface.SetFont("BadCoderzHACK")
+		local w, h = surface.GetTextSize(v)
+		posTbl[k] = {math.random(0, ScrW()-w), math.random(h, ScrH()-h)}
+	end
+
+
 
 	DermaBadCoderz = TDLib("DFrame")
 	BadCoderz.DermaCredits = DermaBadCoderz

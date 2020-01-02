@@ -14,7 +14,7 @@ end)
 
 concommand.Add("BadCoderz", function()
 	if not LocalPlayer():CanUseBadCoderz() then
-		LocalPlayer():ChatPrint("Only the person who paid for the addon ([his/her] steamid64) is allowed to use the addon.\nThis person can still export reports in .txt format to share with his/her team.")
+		LocalPlayer():ChatPrint("You cannot use badcoderz")
 
 		return
 	end

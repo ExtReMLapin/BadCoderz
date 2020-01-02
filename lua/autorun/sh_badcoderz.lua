@@ -5,7 +5,7 @@ local metaplayer = FindMetaTable("Player")
 
 -- you can edit the steamid64
 function metaplayer:CanUseBadCoderz()
-	return self:SteamID64() == "76561198001451981" or self:IsUserGroup("superadmin")
+	return game.SinglePlayer() or self:IsUserGroup("superadmin")
 end
 
 

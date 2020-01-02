@@ -471,6 +471,7 @@ function BadCoderz.Credits()
 	posTbl = {}
 
 	proGamer = nil
+	-- no optimization for you
 	for k, v in ipairs(credits) do
 		if not proGamer and string.find(v, LocalPlayer():SteamID64()) then proGamer = k end
 		surface.SetFont("BadCoderzHACK")

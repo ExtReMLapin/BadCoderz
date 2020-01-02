@@ -103,9 +103,6 @@ _Anything else i should know ?_
 
 Keep in mind this is a technical tool, it's meant to be used with a brain and at least one eye.
 
-Also, only the person who bought the addon (or has it on gmodstore, it's tied to the steamid) can technically use it.
-
-(Okay this is not technically true, but for each game session, the guy who bought it need to use it first, then any other superadmin can use it)
 
 If you want your staff to help you, export a report and send it to them.
 

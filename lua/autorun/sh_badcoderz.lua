@@ -2,12 +2,9 @@ BadCoderz = BadCoderz or {}
 
 local metaplayer = FindMetaTable("Player")
 
-
--- you can edit the steamid64
 function metaplayer:CanUseBadCoderz()
 	return game.SinglePlayer() or self:IsUserGroup("superadmin")
 end
-
 
 
 if SERVER then

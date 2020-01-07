@@ -406,13 +406,13 @@ for k, v in ipairs(bdctbl) do
 end
 
 local timedown = 5
-local offsetbase = -ScrH()/2-300
+local offsetbase = -ScrH()*0.5-300
 local function flagdraw(startTime)
 	surface.SetFont("BadCoderzHACK")
 	surface.SetTextColor(color_green)
 	local charsizew, charsizeh = surface.GetTextSize('▀')
 	local i = 1
-	local x = ScrW() / 2 - (108 * charsizew) / 2 + math.cos(CurTime() * 1.5 + 2) * 15
+	local x = ScrW() * 0.5 - (108 * charsizew) * 0.5 + math.cos(CurTime() * 1.5 + 2) * 15
 	local yoffset = 0
 
 	if (CurTime() < startTime + timedown) then
@@ -442,7 +442,7 @@ local function flagdraw(startTime)
 
 	for k, v in ipairs(credits) do
 		if k == proGamer then continue end
-		local timeChange1 = math.cos(CurTime() + k * k / 2) * 20
+		local timeChange1 = math.cos(CurTime() + k * k * 0.5) * 20
 		local timeChange2 = math.sin(CurTime() + k * k / 5) * 80
 		surface.SetTextPos(posTbl[k][1] + timeChange1, posTbl[k][2] - timeChange2)
 		surface.DrawText(v)
@@ -457,7 +457,7 @@ local function flagdraw(startTime)
 				math.Remap(CurTime(), startTime, startTime + timedown, 0, 255)
 				)
 			)
-		local timeChange1 = math.cos(CurTime() + proGamer * proGamer / 2) * 20
+		local timeChange1 = math.cos(CurTime() + proGamer * proGamer * 0.5) * 20
 		local timeChange2 = math.sin(CurTime() + proGamer * proGamer / 5) * 80
 		surface.SetTextPos(posTbl[proGamer][1] + timeChange1, posTbl[proGamer][2] - timeChange2)
 		surface.DrawText(credits[proGamer])

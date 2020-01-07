@@ -204,8 +204,8 @@ local function _hook()
 			continue
 		end
 		local infoline = {location = fixGMAPath(data.source:gsub("^@", "")), line = data.currentline}
-		table.insert(lines, infoline)
-		table.insert(functions, data.func)
+    lines[#lines + 1] = infoline
+    functions[#functions + 1] = data.func
 		foundhookLevel = foundhookLevel - 1
 	end
 

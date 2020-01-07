@@ -31,7 +31,7 @@ local function parseFileList(gma_path)
 		local fileName = nextzero(gma, true)
 
 		if string.EndsWith(fileName, ".lua") then
-			table.insert(filelist, fileName)
+      filelist[#filelist + 1] = fileName
 		end
 
 		gma:Skip(12)

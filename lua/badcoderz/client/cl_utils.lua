@@ -2,7 +2,7 @@ local function openWikipage(func_name)
 	func_name = string.Replace(func_name,".","/")
 	func_name = string.Replace(func_name,":","/")
 	gui.OpenURL("https://wiki.garrysmod.com/page/" .. func_name)
-	--input.SetCursorPos(ScrW()/2+239, ScrH()/2+34) -- hackerman
+	--input.SetCursorPos(ScrW()/2+239, ScrH()*0.5+34) -- hackerman
 end
 
 

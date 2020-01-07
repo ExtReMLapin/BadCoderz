@@ -138,7 +138,7 @@ classes.BarHover = function(pnl, col, height, speed)
 	pnl:On("Paint", function(s, w, h)
 		local bar = math.Round(w * s.BarHover)
 		surface.SetDrawColor(col)
-		surface.DrawRect(w / 2 - bar / 2, h - height, bar, height)
+		surface.DrawRect(w * 0.5 - bar * 0.5, h - height, bar, height)
 	end)
 end
 
@@ -270,12 +270,12 @@ classes.Text = function(pnl, text, font, col, alignment, ox, oy, paint)
 			local x = 0
 
 			if (alignment == TEXT_ALIGN_CENTER) then
-				x = w / 2
+				x = w * 0.5
 			elseif (alignment == TEXT_ALIGN_RIGHT) then
 				x = w
 			end
 
-			draw.SimpleText(text, font, x + ox, h / 2 + oy, col, alignment, TEXT_ALIGN_CENTER)
+			draw.SimpleText(text, font, x + ox, h * 0.5 + oy, col, alignment, TEXT_ALIGN_CENTER)
 		end)
 	end
 end
@@ -293,13 +293,13 @@ classes.DualText = function(pnl, toptext, topfont, topcol, bottomtext, bottomfon
 		local tw, th = surface.GetTextSize(toptext)
 		surface.SetFont(bottomfont)
 		local bw, bh = surface.GetTextSize(bottomtext)
-		local y1, y2 = h / 2 - bh / 2, h / 2 + th / 2
+		local y1, y2 = h * 0.5 - bh * 0.5, h * 0.5 + th * 0.5
 		local x
 
 		if (alignment == TEXT_ALIGN_LEFT) then
 			x = 0
 		elseif (alignment == TEXT_ALIGN_CENTER) then
-			x = w / 2
+			x = w * 0.5
 		elseif (alignment == TEXT_ALIGN_RIGHT) then
 			x = w
 		end
@@ -382,7 +382,7 @@ classes.SquareCheckbox = function(pnl, inner, outer, speed)
 		surface.DrawOutlinedRect(0, 0, w, h)
 		local bw, bh = (w - 4) * s.SquareCheckbox, (h - 4) * s.SquareCheckbox
 		bw, bh = math.Round(bw), math.Round(bh)
-		surface.DrawRect(w / 2 - bw / 2, h / 2 - bh / 2, bw, bh)
+		surface.DrawRect(w * 0.5 - bw * 0.5, h * 0.5 - bh * 0.5, bw, bh)
 	end)
 end
 
@@ -398,9 +398,9 @@ classes.CircleCheckbox = function(pnl, inner, outer, speed)
 	pnl:On("Paint", function(s, w, h)
 		draw.NoTexture()
 		surface.SetDrawColor(outer)
-		drawCircle(w / 2, h / 2, w / 2 - 1)
+		drawCircle(w * 0.5, h * 0.5, w * 0.5 - 1)
 		surface.SetDrawColor(inner)
-		drawCircle(w / 2, h / 2, w * s.CircleCheckbox / 2)
+		drawCircle(w * 0.5, h * 0.5, w * s.CircleCheckbox * 0.5)
 	end)
 end
 
@@ -448,7 +448,7 @@ end
 
 classes.CircleAvatar = function(pnl)
 	pnl:Class("AvatarMask", function(s, w, h)
-		drawCircle(w / 2, h / 2, w / 2)
+		drawCircle(w * 0.5, h * 0.5, w * 0.5)
 	end)
 end
 
@@ -458,7 +458,7 @@ classes.Circle = function(pnl, col)
 	pnl:On("Paint", function(s, w, h)
 		draw.NoTexture()
 		surface.SetDrawColor(col)
-		drawCircle(w / 2, h / 2, math.min(w, h) / 2)
+		drawCircle(w * 0.5, h * 0.5, math.min(w, h) * 0.5)
 	end)
 end
 
@@ -470,7 +470,7 @@ classes.CircleFadeHover = function(pnl, col, speed)
 	pnl:On("Paint", function(s, w, h)
 		draw.NoTexture()
 		surface.SetDrawColor(ColorAlpha(col, col.a * s.CircleFadeHover))
-		drawCircle(w / 2, h / 2, math.min(w, h) / 2)
+		drawCircle(w * 0.5, h * 0.5, math.min(w, h) * 0.5)
 	end)
 end
 
@@ -480,10 +480,10 @@ classes.CircleExpandHover = function(pnl, col, speed)
 	pnl:SetupTransition("CircleExpandHover", speed, TDLibUtil.HoverFunc)
 
 	pnl:On("Paint", function(s, w, h)
-		local rad = math.Round(w / 2 * s.CircleExpandHover)
+		local rad = math.Round(w * 0.5 * s.CircleExpandHover)
 		draw.NoTexture()
 		surface.SetDrawColor(ColorAlpha(col, col.a * s.CircleExpandHover))
-		drawCircle(w / 2, h / 2, rad)
+		drawCircle(w * 0.5, h * 0.5, rad)
 	end)
 end
 

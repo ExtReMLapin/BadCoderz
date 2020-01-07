@@ -26,7 +26,7 @@ function BadCoderz.openLuaPad(luaCode, path, line)
 	EditorFrame:MakePopup()
 
 
-	EditorFrame:ClearPaint():Background(color_white):Outline(color_black):Text("MetaStruct's WEB Lua editor @" .. path, "BadCoderzFont1", color_black, TEXT_ALIGN_LEFT, 10, -EditorFrame:GetTall() / 2 + 15, true)
+	EditorFrame:ClearPaint():Background(color_white):Outline(color_black):Text("MetaStruct's WEB Lua editor @" .. path, "BadCoderzFont1", color_black, TEXT_ALIGN_LEFT, 10, -EditorFrame:GetTall() * 0.5 + 15, true)
 
 
 	EditorFrame:ShowCloseButton(false)
@@ -76,7 +76,7 @@ function BadCoderz.ShowUI(ongoingServerScan)
 	DermaBadCoderz:ShowCloseButton(false)
 	DermaBadCoderz.btnMaxim.Paint = function() end
 	DermaBadCoderz.btnMinim.Paint = function() end
-	DermaBadCoderz:ClearPaint():Background(color_white):Outline(color_black):Text("BadCoderz control Panel", "BadCoderzFont1", color_black, TEXT_ALIGN_LEFT, 10, -DermaBadCoderz:GetTall() / 2 + 20, true)
+	DermaBadCoderz:ClearPaint():Background(color_white):Outline(color_black):Text("BadCoderz control Panel", "BadCoderzFont1", color_black, TEXT_ALIGN_LEFT, 10, -DermaBadCoderz:GetTall() * 0.5 + 20, true)
 
 	DermaBadCoderz.Wizz = function(pnl)
 		notification.AddLegacy("No report to export!", NOTIFY_ERROR, 3)
@@ -371,7 +371,7 @@ function BadCoderz.ShowUI(ongoingServerScan)
 
 			SliderReopentimer.Slider.Paint = function(self, w, h)
 				surface.SetDrawColor(75, 75, 75, 100)
-				surface.DrawRect(8, h / 2 - 2, w - 12, 3)
+				surface.DrawRect(8, h * 0.5 - 2, w - 12, 3)
 			end
 
 			SliderReopentimer.Slider.Knob.Paint = function(self, w, h)

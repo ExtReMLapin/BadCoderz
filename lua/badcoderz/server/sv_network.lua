@@ -43,7 +43,7 @@ end)
 
 net.Receive("BadCoderz_serverside_file_open",function (len, ply)
 	if not ply:CanUseBadCoderz() then return end
-		
+
 	local gamePath = net.ReadString()
 	local fakePath = net.ReadString()
 	local line;

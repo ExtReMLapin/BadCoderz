@@ -57,6 +57,7 @@ local function _hook()
 		return
 	end
 
+	-- I should probably manually parse the stack with debug.getinfo but whatever
 	local trace = debug.traceback("", 0):gsub("\nstack traceback:\n", ""):gsub("\t", "")
 	local traceback = string.Split(trace, '\n')
 	local traceTable = {}
@@ -74,9 +75,11 @@ local function _hook()
 
 
 	for k, v in pairs(traceback) do
+
+		-- high likely fixed by using debug.getinfo when parsing the stack with debug.getinfo
 		local endlocation = string.find(v, ":")
 		if not endlocation then
-			print("could not find line info for traceline please send the following lines to the BadCoderz developer (open a ticket) :")
+			print("could not find line info for traceline please send the following lines to the BadCoderz developer :")
 			print(trace)
 			traceTable[k] = {
 				location = "???",
@@ -85,7 +88,7 @@ local function _hook()
 			continue
 		end
 		local location = string.sub(v, 1, endlocation - 1)
-		local endLineData = string.find(v, ":", endlocation + 1)
+		local endLineData = string.find(v, ":", endlocation + 1) -- can be faster if using debug.getinfo
 		local line = -1
 
 		if endLineData then
@@ -215,6 +218,7 @@ end
 
 local function start_scan()
 	jit.off()
+	-- you also need to flush the jit cache because it may miss something if one day LuaJIT stitching gets jitted with black magic
 	jit.flush()
 
 	hook.Add("Think", "badCoderzTrapHook", initScan)

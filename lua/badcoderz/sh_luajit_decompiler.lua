@@ -1,3 +1,12 @@
+
+--[[
+If you're interrested in this kind of stuff you can go here
+https://github.com/ExtReMLapin/luajit_func_bytecode_toolbox
+
+https://gist.github.com/meepen/807dd81a572ffb0f28a8c44c04922fdd
+
+]]
+
 local instructions_db = {
 	CALL = 62,
 	KSHORT = 39,
@@ -17,6 +26,7 @@ local function disassemble_function(fn)
 	end
 
 
+	-- consts are BELLOW zero, const integers are ABOVE zero
 	local consts = {}
 	n = -1
 	local value = jit.util.funck(fn, n)
@@ -65,8 +75,9 @@ local Color_calls = {}
 Color_calls["Color"] = true
 Color_calls["SetDrawColor"] = true
 
--- to fix : it just find any Color() with static short int call, doesn't return the line
+-- searchs for Color(KSHORT,KSHORT,KSHORT,[KSHORT])
 function BadCoderz.find_color_call_static_args(fn)
+	-- to fix : it just find any Color() with static short int call, doesn't return the line
 	local disassembled_code = disassemble_function(fn)
 	local targeted_consts = {}
 	local targeted_upvalues = {}

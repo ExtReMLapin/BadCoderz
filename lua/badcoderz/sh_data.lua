@@ -16,6 +16,14 @@ BadCoderz.heavy_funcs = {
 	[file.Time] = "file.Time",
 	[file.Write] = "file.Write",
 	[Color] = "Color"
+	--[[
+	candidates for "dumb fuckers" update :
+	CompileString
+	RunString
+	RunStringEx
+	ents.Create
+	surface.CreateFont
+	]]
 }
 
 
@@ -39,8 +47,9 @@ BadCoderz.toolTips["file.Size"] = BadCoderz.toolTips["file.Append"]
 BadCoderz.toolTips["file.Time"] = BadCoderz.toolTips["file.Append"]
 BadCoderz.toolTips["file.Write"] = BadCoderz.toolTips["file.Append"]
 
+
+--pretty much the heavy hooks where you should not use IO/heavy funcs
 BadCoderz.dangerous_hooks = {
-	["LOADED"] = true,
 	["Tick"] = true,
 	["Think"] = true,
 	["PlayerDeathThink"] = true,

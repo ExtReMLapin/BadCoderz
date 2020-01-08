@@ -1,5 +1,13 @@
 BadCoderz.GMA_DB = {}
 
+--[[
+	Documentation here : 
+	https://github.com/Facepunch/garrysmod-requests/issues/1394#issuecomment-524551787
+
+]]
+
+
+-- go forward till you "meet" a \0
 local function nextzero(file, _return)
 	local byte = file:ReadByte()
 	local str = ""

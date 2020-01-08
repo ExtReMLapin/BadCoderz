@@ -29,6 +29,7 @@ surface.CreateFont("BadCoderzFont3", {
 })
 
 if not DarkRP then
+	-- if any fuckers tries to "emulate" darkrp by creating the DarkRP global var, he's an idiot
 	surface.CreateFont("Trebuchet48", {
 		size = 48,
 		weight = 500,

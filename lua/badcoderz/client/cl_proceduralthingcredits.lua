@@ -492,6 +492,7 @@ function BadCoderz.Credits()
 	DermaBadCoderz:ShowCloseButton(false)
 	DermaBadCoderz.btnMaxim.Paint = function(panel, w, h) end
 	DermaBadCoderz.btnMinim.Paint = function(panel, w, h) end
+
 	local buttonClose = TDLib("DButton", DermaBadCoderz)
 	buttonClose:SetText("")
 	buttonClose:SetSize(100, 40)

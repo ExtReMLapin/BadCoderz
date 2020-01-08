@@ -176,7 +176,11 @@ function BadCoderz.populateTreeWithData(treePanel, dataTbl, client)
 						callLineNode:SetTooltip("Click to expand the call history")
 						for k, location in pairs(calls.lines) do
 
-
+							--[[
+								Intentional variable shadowing,
+								don't remove `local`,
+								it would override next loop's value
+							]]
 							local fixedName = location.location
 							local findGMA = string.find(location.location, ".gma", 1 , true)
 							if findGMA then

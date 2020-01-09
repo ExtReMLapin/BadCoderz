@@ -1,6 +1,8 @@
 # BadCoderz
 ### Find unoptimized addons and KILL the devs who made them
 
+
+
 [Workshop page](https://steamcommunity.com/sharedfiles/filedetails/?id=1955436281)
 
 [English video](https://www.youtube.com/watch?v=TVT5k3CHPQQ)
@@ -112,6 +114,6 @@ Thanks :
 
 [RE Lexi](https://steamcommunity.com/profiles/76561198090218596) for the banner
 
-Threebow for TDLib
+Threebow for [TDLib](https://github.com/Threebow/tdlib)
 
 [Metastruct](https://github.com/Metastruct) for the [html lua editor](https://github.com/Metastruct/lua_editor)

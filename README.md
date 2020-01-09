@@ -33,9 +33,9 @@ A profiler doesn't tell you if code is shit so you don't know if there is a good
 1.  Download BadCoderz
 2.  Identify the addons coded like shit
 3.  Do something about it :
-4.  Remove the addon
-5.  Fix it
-6.  Send the report to the dev so he can fix it
+    * Remove the addon
+    * Fix it
+    * Send the report to the dev so he can fix it
 7.  (Optional) Smash the dev's head on the ground
 8.  Keep your players because your server now has much better performances and less shitty code
 

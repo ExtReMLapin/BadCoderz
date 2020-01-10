@@ -1,6 +1,8 @@
 # BadCoderz
 ### Find unoptimized addons and KILL the devs who made them
 
+
+
 [Workshop page](https://steamcommunity.com/sharedfiles/filedetails/?id=1955436281)
 
 [English video](https://www.youtube.com/watch?v=TVT5k3CHPQQ)
@@ -8,7 +10,7 @@
 [Video in french for my fellows baguettes](https://youtu.be/nNvq3CKccic) (Oudated since the video doesn't show GMA path support)
 
 
-**_How it it different from a profiler ?_**
+## **_How it it different from a profiler ?_**
 
 A profiler doesn't tell you if code is shit so you don't know if there is a good reason for a code to be "slow", here BadCoderz highlights you the shit code of your server and explains you why it's shit.
 
@@ -31,9 +33,9 @@ A profiler doesn't tell you if code is shit so you don't know if there is a good
 1.  Download BadCoderz
 2.  Identify the addons coded like shit
 3.  Do something about it :
-4.  Remove the addon
-5.  Fix it
-6.  Send the report to the dev so he can fix it
+    * Remove the addon
+    * Fix it
+    * Send the report to the dev so he can fix it
 7.  (Optional) Smash the dev's head on the ground
 8.  Keep your players because your server now has much better performances and less shitty code
 
@@ -43,7 +45,7 @@ A profiler can flag a function as "heavy/slow" without knowing if it's actually 
 
 BadCoderz uses a database of known mistakes (function and contexts) to find the unoptimized code in your addons/gamemode.
 
-_So, how does it work exactly ?_
+## _So, how does it work exactly ?_
 
 Simply open BadCoderz using the `badcoderz` command.
 
@@ -69,7 +71,7 @@ Hover the one of the call stack line and it will show you a preview of the code
 
 ![](https://i.imgur.com/VcTb2ZW.png)
 
-_Wait, do i need to understand Lua to use it ?_
+## _Wait, do i need to understand Lua to use it ?_
 
 Not at all, but it's obviously much better to know how Lua and gmod works, but with common sense you can easily find which addon is coded like shit.
 
@@ -79,7 +81,7 @@ Not at all, but it's obviously much better to know how Lua and gmod works, but w
 
 Obviously, there might be some "false positive" detections, but with common sense and with the stack call history, you should be fine.
 
-_I got a short memory, can you explain me quickly the difference between a profiler and this ?_
+## _I got a short memory, can you explain me quickly the difference between a profiler and this ?_
 
 A profiler find CPU intensive functions without knowing if they are actually coded like shit, this addon find all the function coded like shit.
 
@@ -89,7 +91,7 @@ Most of the people who use fprofiler actually don't know what they're doing.
 
 Optimized doesn't mean being fast, optimized means being efficient.
 
-_I still got a short memory, who can use this addon ?_
+## _I still got a short memory, who can use this addon ?_
 
 Here is a non-exhaustive list :
 
@@ -99,7 +101,7 @@ Here is a non-exhaustive list :
 
 *   Junior Lua dev releasing his first addon : He want to be sure he didn't do anything that would destroy the server performances.
 
-_Anything else i should know ?_
+## _Anything else i should know ?_
 
 Keep in mind this is a technical tool, it's meant to be used with a brain and at least one eye.
 
@@ -112,6 +114,6 @@ Thanks :
 
 [RE Lexi](https://steamcommunity.com/profiles/76561198090218596) for the banner
 
-Threebow for TDLib
+Threebow for [TDLib](https://github.com/Threebow/tdlib)
 
 [Metastruct](https://github.com/Metastruct) for the [html lua editor](https://github.com/Metastruct/lua_editor)

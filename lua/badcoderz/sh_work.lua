@@ -37,15 +37,19 @@ end
 
 --[[
 	Some libs like ULib overwrite the hooks functions, so to detect it by locations we need to manually run a hook
-	then detect the top function in the call stack and decide it's the file where the call stack comes from
+	then detect the top function in the call stack and decide it's the file where the call comes from
 ]]
 local function initScan()
-	local trace = debug.traceback("", 0):gsub("\nstack traceback:\n", ""):gsub("\t", "")
-	local traceback = string.Split(trace, '\n')
-	local path = traceback[#traceback]
-	local endlocation = string.find(path, ":")
-	local location = string.sub(path, 1, endlocation - 1)
-	BadCoderz.potentialsHooksFiles[location] = true
+	local debugTable
+	local level = 1
+	while true do
+		local _debugTable = debug.getinfo(level, "S")
+		if not _debugTable then break end
+		debugTable = _debugTable
+		level = level + 1
+	end
+	assert(debugTable, "What the fuck did you do to the hook system ?")
+	BadCoderz.potentialsHooksFiles[debugTable.source:sub(2)] = true
 	hook.Remove("Think", "badCoderzTrapHook")
 end
 
@@ -56,11 +60,6 @@ local function _hook()
 	if not BadCoderz.heavy_funcs[calledFunc] then
 		return
 	end
-
-	-- I should probably manually parse the stack with debug.getinfo but whatever
-	local trace = debug.traceback("", 0):gsub("\nstack traceback:\n", ""):gsub("\t", "")
-	local traceback = string.Split(trace, '\n')
-	local traceTable = {}
 
 	if calledFunc == Color then
 		local callingContext = debug.getinfo(curStackLevel + 1, "f")
@@ -74,34 +73,18 @@ local function _hook()
 	end
 
 
-	for k, v in pairs(traceback) do
-
-		-- high likely fixed by using debug.getinfo when parsing the stack with debug.getinfo
-		local endlocation = string.find(v, ":")
-		if not endlocation then
-			print("could not find line info for traceline please send the following lines to the BadCoderz developer :")
-			print(trace)
-			traceTable[k] = {
-				location = "???",
-				line = 0
-			}
-			continue
-		end
-		local location = string.sub(v, 1, endlocation - 1)
-		local endLineData = string.find(v, ":", endlocation + 1) -- can be faster if using debug.getinfo
-		local line = -1
-
-		if endLineData then
-			line = tonumber(string.sub(v, endlocation + 1, endLineData - 1))
-		end
-
-		traceTable[k] = {
-			location = location,
-			line = line
+	local level = 0
+	traceTable = {}
+	while true do
+		local debugTable = debug.getinfo(level, "Sl")
+		if not debugTable then break end
+		level = level + 1
+		-- already got level++'ed, don't do it again here
+		traceTable[level] = {
+			location = debugTable.source:sub(2),
+			line = debugTable.currentline
 		}
 	end
-
-
 
 	--------- getting the hook call
 	local foundhookLevel = -1

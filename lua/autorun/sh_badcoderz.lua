@@ -3,7 +3,7 @@ BadCoderz = BadCoderz or {}
 local metaplayer = FindMetaTable("Player")
 
 function metaplayer:CanUseBadCoderz()
-	return game.SinglePlayer() or self:IsUserGroup("superadmin")
+	return game.SinglePlayer() or self:IsSuperAdmin()
 end
 
 

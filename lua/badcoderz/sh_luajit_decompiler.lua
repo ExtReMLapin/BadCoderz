@@ -7,13 +7,27 @@ https://gist.github.com/meepen/807dd81a572ffb0f28a8c44c04922fdd
 
 ]]
 
-local instructions_db = {
-	CALL = 62,
-	KSHORT = 39,
-	GGET = 52,
-	UGET = 43,
-	FUNCF = 85
-}
+local instructions_db;
+
+if jit.version_num < 20100 then
+	instructions_db = {
+		CALL = 62,
+		KSHORT = 39,
+		GGET = 52,
+		UGET = 43,
+		FUNCF = 85,
+		KNUM = 40
+	}
+else -- bytecode changes
+	instructions_db = {
+		CALL = 66,
+		KSHORT = 41,
+		GGET = 54,
+		UGET = 45,
+		FUNCF = 89,
+		KNUM = 42
+	}
+end
 
 local function disassemble_function(fn)
 	local upvalues = {}
@@ -26,7 +40,7 @@ local function disassemble_function(fn)
 	end
 
 
-	-- consts are BELLOW zero, const integers are ABOVE zero
+	-- consts are BELLOW zero, 64bits nums (KNUMS) are ABOVE zero but we don't need them here, we're just looking for the functions call names
 	local consts = {}
 	n = -1
 	local value = jit.util.funck(fn, n)
@@ -53,11 +67,6 @@ local function disassemble_function(fn)
 			D = bit.rshift(ins, 16),
 			OP_CODE = bit.band(ins, 0xFF)
 		}
-		--[[instruction.C = bit.rshift(bit.band(ins, 0x00ff0000), 16)
-		instruction.B = bit.rshift(ins, 24)
-		instruction.A = bit.rshift(bit.band(ins, 0x0000ff00), 8)
-		instruction.D = bit.rshift(ins, 16)
-		instruction.OP_CODE = bit.band(ins, 0xFF)]]
 		instructions[n] = instruction
 		n = n + 1
 	end
@@ -71,25 +80,31 @@ local function disassemble_function(fn)
 	return ret
 end
 
-local Color_calls = {}
-Color_calls["Color"] = true
-Color_calls["SetDrawColor"] = true
-
--- searchs for Color(KSHORT,KSHORT,KSHORT,[KSHORT])
-function BadCoderz.find_color_call_static_args(fn)
+function BadCoderz.find_call_static_args(fn, definition, expectedLine)
 	-- to fix : it just find any Color() with static short int call, doesn't return the line
+	local minNums = 0
+	local maxNums = 0
+	for k, v in ipairs(definition[2]) do
+		if v == true then
+			minNums = minNums + 1
+		end
+		maxNums = maxNums + 1
+	end
+
+
+
 	local disassembled_code = disassemble_function(fn)
 	local targeted_consts = {}
 	local targeted_upvalues = {}
 
 	for k, v in pairs(disassembled_code.consts) do
-		if Color_calls[v] then
+		if definition[1][v] then
 			targeted_consts[k] = true
 		end
 	end
 
 	for k, v in pairs(disassembled_code.upvalues) do
-		if Color_calls[v] then
+		if definition[1][v] then
 			targeted_upvalues[k] = true
 		end
 	end
@@ -104,20 +119,20 @@ function BadCoderz.find_color_call_static_args(fn)
 	while (i <= count) do
 		local instruction = disassembled_code.instructions[i]
 
-		if ((instruction.OP_CODE == instructions_db.GGET) and (targeted_consts[instruction.D] == true) or
+		if (((instruction.OP_CODE == instructions_db.GGET) and (targeted_consts[instruction.D] == true) or
 			(instruction.OP_CODE == instructions_db.UGET) and (targeted_upvalues[instruction.D] == true))
-				and (i + 4) < count then
-			local KSHORT_count = 0
+				and ((i + minNums) < count) and jit.util.funcinfo(fn, i).currentline == expectedLine) then
+			local NUMBER_count = 0
 			local i2 = i + 1
 			local cur_instruction = disassembled_code.instructions[i2]
 
-			while ((i2 <= count) and (cur_instruction.OP_CODE == instructions_db.KSHORT)) do
-				KSHORT_count = KSHORT_count + 1
+			while ((i2 <= count) and ((cur_instruction.OP_CODE == instructions_db.KSHORT) or (cur_instruction.OP_CODE == instructions_db.KNUM))) do
+				NUMBER_count = NUMBER_count + 1
 				i2 = i2 + 1
 				cur_instruction = disassembled_code.instructions[i2]
 			end
 
-			if (KSHORT_count ~= 3 and KSHORT_count ~= 4) then
+			if (NUMBER_count < minNums or NUMBER_count > maxNums) then
 				i = i + 1
 				continue
 			end

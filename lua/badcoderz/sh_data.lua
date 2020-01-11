@@ -15,7 +15,9 @@ BadCoderz.heavy_funcs = {
 	[file.Size] = "file.Size",
 	[file.Time] = "file.Time",
 	[file.Write] = "file.Write",
-	[Color] = "Color"
+	[Color] = "Color",
+	[Vector] = "Vector",
+	[Angle] = "Angle",
 	--[[
 	candidates for "dumb fuckers" update :
 	CompileString
@@ -23,16 +25,42 @@ BadCoderz.heavy_funcs = {
 	RunStringEx
 	ents.Create
 	surface.CreateFont
+	table.HasValue
 	]]
 }
 
+-- bool is represending a required(true) knum/kshort or an optional one (false), it's used when inspecting the bytecode
+BadCoderz.heavy_funcs_objects = {
+	[Color] = {
+		{
+			["Color"] = true,
+			["SetDrawColor"] = true
+		},
+		{true, true, true, false}
+	},
+	[Vector] = {
+		{
+			["Vector"] = true
+		},
+		{true, true, true}
+	},
+	[Angle] = {
+		{
+			["Angle"] = true
+		},
+		{true, true, true}
+	}
+}
 
 
 BadCoderz.toolTips = {
 	["player.GetAll"] = "This function is used to find all players, it depends of the implementation and what the dev is doing with it but there is good chances he's doing CPU Intensive things in this loop",
 	["ents.GetAll"] = "This function is used to find all entities (A LOT), it depends of the implementation and what the dev is doing with it but there is good chances he's doing CPU Intensive things in this loop",
 	["file.Append"] = "Working with files is always slow, doing it a lot is a TERRIBLE IDEA",
-	["Color"] = "This functions creates a new Color object on each call, it takes ram, cpu time to be allocated in the memory and cpu time by the garbage collector, so the dev is supposed to cache it. Only the Color() calls with static values (not vars) are detected."
+	["Color"] = "You NEVER need to create a color on each frame with static arguments, cache it out of your rendering context.",
+	["Vector"] = "You NEVER need to create a vector with static arguments on each tick, cache it outside of the hook and if you need to, use the Vectors metamethods.\nEx :\n\tpos:Add(posOffset)\ninstead of :\n\tpos1+Vector(4,0,9)\n",
+	["Angle"] = "You NEVER need to create an angle with static arguments on each tick, cache it outside of the hook and if you need to, use the Angles metamethods.\nEx :\n\tang1:Add(ang2)\ninstead of :\n\tang1+Vector(4,0,9)\n"
+
 }
 
 BadCoderz.toolTips["file.CreateDir"] = BadCoderz.toolTips["file.Append"]

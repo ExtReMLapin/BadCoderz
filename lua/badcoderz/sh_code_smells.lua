@@ -61,12 +61,14 @@ local function _hook()
 		return
 	end
 
-	if calledFunc == Color then
-		local callingContext = debug.getinfo(curStackLevel + 1, "fS")
-		if callingContext.what == "C" then return end -- C could be calling Color() for some reason
+	--threats functions like Color/Angle/Vector in a different way since the way it's called matters
+	local heavyObject = BadCoderz.heavy_funcs_objects[calledFunc]
+	if heavyObject then
+		local callingContext = debug.getinfo(curStackLevel + 1, "fSl")
+		if callingContext.what == "C" then return end -- C could be calling it for some reason
 		local callingContextFunc = callingContext.func
 
-		local found = BadCoderz.find_color_call_static_args(callingContextFunc)
+		local found = BadCoderz.find_call_static_args(callingContextFunc, heavyObject, callingContext.currentline)
 		if not found then
 			return
 		end

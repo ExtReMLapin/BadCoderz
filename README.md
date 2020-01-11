@@ -30,6 +30,8 @@ A profiler doesn't tell you if code is shit so you don't know if there is a good
 
 ![](https://i.imgur.com/gyO07pu.png) Compatibility with [GLib](https://github.com/notcake/glib) allowing you to decompile functions generated with CompileString or RunString (you need to download GLib if you want to use it)
 
+![](https://i.imgur.com/gyO07pu.png) [RunString explorer](https://www.youtube.com/watch?v=Plwa65CNePw) (no defensive/offensive mechanism)
+
 1.  Download BadCoderz
 2.  Identify the addons coded like shit
 3.  Do something about it :

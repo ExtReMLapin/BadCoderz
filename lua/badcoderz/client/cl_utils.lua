@@ -229,3 +229,62 @@ function BadCoderz.populateTreeWithData(treePanel, dataTbl, client)
 			end
 		end
 end
+
+function BadCoderz.generateDListView(pnl, x, y, w, h, dataTbl, client)
+	local CompiledFuncsList = vgui.Create("DListView", pnl)
+	CompiledFuncsList:SetPos(x, y)
+	CompiledFuncsList:SetSize(w, h)
+	CompiledFuncsList:SetMultiSelect(false)
+	CompiledFuncsList:AddColumn("Signature")
+	CompiledFuncsList:AddColumn("Address")
+	CompiledFuncsList:AddColumn("Bytecode Size")
+	CompiledFuncsList:AddColumn("Suspiciosity Level")
+	CompiledFuncsList:AddColumn("Compilation timestamp")
+
+	if client then
+		for index, compiledTable in pairs(dataTbl) do
+			CompiledFuncsList:AddLine(compiledTable.location, compiledTable.pointer, string.dump(compiledTable.func):len(), compiledTable.level, compiledTable.time, index, compiledTable.stack, compiledTable.func)
+		end
+		CompiledFuncsList:SortByColumn(4, true)
+	else
+		net.Start("BadCoderz_compiled_report_request") -- ghetto async
+		net.SendToServer()
+		net.Receive("BadCoderz_compiled_report_request", function()
+			local len = net.ReadUInt(16)
+			local i = 1
+
+			while (i <= len) do
+				local funcLen = net.ReadUInt(16)
+				local location = net.ReadString()
+				local pointer = net.ReadString()
+				local level = net.ReadUInt(4)
+				local time = net.ReadFloat()
+				if CompiledFuncsList and CompiledFuncsList:IsValid() then -- we need to empty the network buffer anyway
+					CompiledFuncsList:AddLine(location, pointer, funcLen, level, time, i)
+				end
+				i = i + 1
+			end
+			if CompiledFuncsList and CompiledFuncsList:IsValid() then 
+				CompiledFuncsList:SortByColumn(4, true)
+			end
+		end)
+	end
+
+
+	if not GLib then return end
+
+	CompiledFuncsList.DoDoubleClick = function(lst, lineID, pnl)
+		local tblIndex = pnl:GetColumnText(6)
+
+		if client then
+			local code = string.format("--[[\n\n%s\n\n]]\n\n", pnl:GetColumnText(7)) .. GLib.Lua.BytecodeReader(pnl:GetColumnText(8)):ToString()
+			BadCoderz.openLuaPad(code, "DECOMPILED VIRTUAL FUNCTION : " .. pnl:GetColumnText(2) .. " " .. pnl:GetColumnText(1))
+		else
+			net.Start("BadCoderz_serverside_bytecode_reader")
+			net.WriteUInt(tblIndex, 16)
+			net.SendToServer()
+		end
+	end
+
+	return CompiledFuncsList
+end

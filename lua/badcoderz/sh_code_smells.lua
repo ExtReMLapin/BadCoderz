@@ -62,7 +62,8 @@ local function _hook()
 	end
 
 	if calledFunc == Color then
-		local callingContext = debug.getinfo(curStackLevel + 1, "f")
+		local callingContext = debug.getinfo(curStackLevel + 1, "fS")
+		if callingContext.what == "C" then return end -- C could be calling Color() for some reason
 		local callingContextFunc = callingContext.func
 
 		local found = BadCoderz.find_color_call_static_args(callingContextFunc)
@@ -205,7 +206,7 @@ local function start_scan()
 	jit.flush()
 
 	hook.Add("Think", "badCoderzTrapHook", initScan)
-	BadCoderz.test_running = true
+	BadCoderz.scanningCodeSmells = true
 	reports = {}
 
 	if CLIENT and gui.IsConsoleVisible() then
@@ -216,12 +217,12 @@ end
 
 local function stop_scan()
 	jit.on()
-	BadCoderz.test_running = false
+	BadCoderz.scanningCodeSmells = false
 	debug.sethook(_hook, "")
 end
 
-function BadCoderz.toggle()
-	if not BadCoderz.test_running then
+function BadCoderz.toggleCodeSmellsScan()
+	if not BadCoderz.scanningCodeSmells then
 		start_scan()
 	else
 		stop_scan()

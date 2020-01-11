@@ -1,4 +1,4 @@
-BadCoderz.test_running = BadCoderz.test_running or false
+BadCoderz.scanningCodeSmells = BadCoderz.scanningCodeSmells or false
 
 BadCoderz.heavy_funcs = {
 	[player.GetAll] = "player.GetAll",

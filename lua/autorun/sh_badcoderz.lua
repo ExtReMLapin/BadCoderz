@@ -11,7 +11,8 @@ if SERVER then
 	AddCSLuaFile()
 	resource.AddWorkshop("1804554591") -- OOF sound, literally
 	AddCSLuaFile("badcoderz/sh_data.lua")
-	AddCSLuaFile("badcoderz/sh_work.lua")
+	AddCSLuaFile("badcoderz/sh_code_smells.lua")
+	AddCSLuaFile("badcoderz/sh_compiled_functions.lua")
 	AddCSLuaFile("badcoderz/client/cl_utils.lua")
 	AddCSLuaFile("badcoderz/client/cl_fonts.lua")
 	AddCSLuaFile("badcoderz/client/cl_ui.lua")
@@ -23,7 +24,8 @@ if SERVER then
 end
 
 include("badcoderz/sh_data.lua")
-include("badcoderz/sh_work.lua")
+include("badcoderz/sh_code_smells.lua")
+include("badcoderz/sh_compiled_functions.lua")
 include("badcoderz/sh_luajit_decompiler.lua")
 
 if CLIENT then

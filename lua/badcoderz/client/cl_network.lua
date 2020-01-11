@@ -8,8 +8,10 @@ function BadCoderz.ReadReport()
 end
 
 net.Receive("BadCoderz_status_request", function()
-	local activeServer = net.ReadBool()
-	BadCoderz.ShowUI(activeServer)
+	local codeSmellsScan = net.ReadBool()
+	local compiledFuncsScan = net.ReadBool()
+	local scanOnReboot = net.ReadBool()
+	BadCoderz.ShowUI(codeSmellsScan, compiledFuncsScan, scanOnReboot)
 end)
 
 concommand.Add("BadCoderz", function()
@@ -51,4 +53,14 @@ net.Receive("BadCoderz_serverside_file_open", function(len)
 	end
 
 	BadCoderz.openLuaPad(data, realPath, line)
+end)
+
+net.Receive("BadCoderz_serverside_bytecode_reader", function(len)
+	assert(GLib, "GLib is missing")
+	local bytecode = util.Decompress(net.ReadData(net.ReadUInt(16)))
+	local pointer = net.ReadString()
+	local stack = net.ReadString()
+	local location = net.ReadString()
+	local code = string.format("--[[\n\n%s\n\n]]\n\n", stack) .. bytecode
+	BadCoderz.openLuaPad(code, "DECOMPILED VIRTUAL FUNCTION : " .. pointer .. " " .. location)
 end)

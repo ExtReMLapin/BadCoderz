@@ -10,11 +10,21 @@ surface.CreateFont("BadCoderzFont1", {
 	weight = 200
 })
 
+
+surface.CreateFont("BadCoderzFont1.2", {
+	font = "Roboto Lt",
+	size = 27,
+	weight = 200
+})
+
 surface.CreateFont("BadCoderzFont1.5", {
 	font = "Roboto Lt",
 	size = 31,
 	weight = 200
 })
+
+
+
 
 surface.CreateFont("BadCoderzFont2", {
 	font = "Roboto Lt",

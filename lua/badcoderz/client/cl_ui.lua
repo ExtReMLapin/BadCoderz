@@ -57,22 +57,27 @@ end
 
 --ghetto ui m8
 
-function BadCoderz.ShowUI(ongoingServerScan)
+-- the arguments here are provided by the server, those are the different states of the possible scans/settings
+function BadCoderz.ShowUI(serverCodeSmellScan, serverCompiledFuncsScan, scanonreboot)
 	if BadCoderz.Derma and IsValid(BadCoderz.Derma) then
 		BadCoderz.Derma:Close()
 	end
 
+	-- resync to server
+	if scanonreboot ~= BadCoderz.scanCompiledFuncsOnNextBoot then
+		BadCoderz.prepareCompiledFuncsScanNextReboot(scanonreboot)
+		print("[BadCoderz] Resynced [SCAN ON NEXT REBOOT] to prevent issues")
+	end
+
 	DermaBadCoderz = TDLib("DFrame")
 	BadCoderz.Derma = DermaBadCoderz
-	DermaBadCoderz.currentmode = 0
 	DermaBadCoderz:SetPos(100, 100)
 	DermaBadCoderz:SetSize(1366, 768)
 	DermaBadCoderz:SetTitle("")
 	DermaBadCoderz:SetDraggable(true)
 	DermaBadCoderz:MakePopup()
 	DermaBadCoderz:Center()
-	local x = DermaBadCoderz:GetPos()
-	--DermaBadCoderz:SetPos(x, 10)
+
 	DermaBadCoderz:ShowCloseButton(false)
 	DermaBadCoderz.btnMaxim.Paint = function() end
 	DermaBadCoderz.btnMinim.Paint = function() end
@@ -117,12 +122,45 @@ function BadCoderz.ShowUI(ongoingServerScan)
 		pnl:GetParent():Close()
 	end
 
+	
+	local buttonClientside = TDLib("DButton", DermaBadCoderz)
+	local buttonRunStrings = TDLib("DButton", DermaBadCoderz)
+	local buttonServerside = TDLib("DButton", DermaBadCoderz)
+
+
+
+--[[
+   ______          __    _____                ____    
+  / ____/___  ____/ /__ / ___/____ ___  ___  / / /____
+ / /   / __ \/ __  / _ \\__ \/ __ `__ \/ _ \/ / / ___/
+/ /___/ /_/ / /_/ /  __/__/ / / / / / /  __/ / (__  ) 
+\____/\____/\__,_/\___/____/_/ /_/ /_/\___/_/_/____/  
+                                                                                           
+]]
+
+
+
+
+
+
+
 	local nbutton = 0
 	local buttonh = 50
-	local curcolor;
+
+
+	local textCodeSmells = TDLib("DPanel", DermaBadCoderz)
+	
+	textCodeSmells:SetSize(DermaBadCoderz:GetWide() - mainHolder:GetWide() - holderbordel-1, buttonh)
+	textCodeSmells:SetPos(1, holdery + nbutton * buttonh)
+	textCodeSmells:ClearPaint()
+	:Text("Code smells", "BadCoderzFont2", color_black, TEXT_ALIGN_CENTER, 5)
+
+	nbutton = nbutton + 1
+
 
 	local curcolor = color_CS
-	local buttonClientside = TDLib("DButton", DermaBadCoderz)
+	
+	
 	DermaBadCoderz.buttonClientside = buttonClientside
 	buttonClientside:SetPos(1, holdery + nbutton * buttonh)
 	buttonClientside:SetSize(DermaBadCoderz:GetWide() - mainHolder:GetWide() - holderbordel-1, buttonh)
@@ -134,17 +172,18 @@ function BadCoderz.ShowUI(ongoingServerScan)
 	:Text("Client Realm", "BadCoderzFont2", color_black, TEXT_ALIGN_CENTER, 5):CircleClick(color_black)
 
 	buttonClientside.DoClick = function(pnl)
+		if BadCoderz.scanningCompiledFuncs then return end
 		pnl.ClickX, pnl.ClickY = pnl:CursorPos()
 		pnl.Rad = 0
 		pnl.Alpha = color_black.a
 		mainHolder:Clear()
 		mainHolder:ClearPaint():Background(color_light_grey):SideBlock(curcolor, 6, LEFT)
-		DermaBadCoderz.currentmode = nbutton
+
 		local labelStatus = vgui.Create( "DLabel", mainHolder )
 		labelStatus:SetPos( 40, 20 )
 		labelStatus:SetSize( 300, 30 )
-		labelStatus:SetText( "Scan status : " ..  (BadCoderz.test_running and "Active" or "Inactive"))
-		labelStatus:SetColor(BadCoderz.test_running and color_dark_green  or color_dark_red)
+		labelStatus:SetText( "Scan status : " ..  (BadCoderz.scanningCodeSmells and "Active" or "Inactive"))
+		labelStatus:SetColor(BadCoderz.scanningCodeSmells and color_dark_green  or color_dark_red)
 		labelStatus:SetFont("BadCoderzFont2")
 
 		local labelProtip = vgui.Create( "DLabel", mainHolder )
@@ -161,31 +200,33 @@ function BadCoderz.ShowUI(ongoingServerScan)
 		buttonStartPause:SetText("")
 
 
-		if BadCoderz.test_running then
+		if BadCoderz.scanningCodeSmells then
 			buttonStartPause:ClearPaint():Background(color_red):FadeHover(color_button_fade, 15):Text("Pause", "BadCoderzFont2", color_white)
 		else
 			buttonStartPause:ClearPaint():Background(color_green):FadeHover(color_button_fade, 15):Text("Start", "BadCoderzFont2", color_white)
 		end
 
 		buttonStartPause.DoClick = function()
-			if (BadCoderz.test_running) then
+			if (BadCoderz.scanningCodeSmells) then
 				LastCSReport = BadCoderz.getReport()
 			else
 				LastCSReport = {}
 			end
-			BadCoderz.toggle()
+			BadCoderz.toggleCodeSmellsScan()
 			local shouldclose = BadCoderz.settings.auto_close_menu:GetBool()
 			local shouldreopen = BadCoderz.settings.auto_reopen_menu:GetBool()
-			if (shouldclose and BadCoderz.test_running and shouldreopen) then -- test running == true because it was called right before
-				local timer_reopen = BadCoderz.settings.auto_reopen_menu_time:GetInt()
+			if (shouldclose and BadCoderz.scanningCodeSmells) then --  == true because it was called right before
 				DermaBadCoderz:Close()
-				timer.Simple(timer_reopen, function()
-					if BadCoderz.Derma and IsValid(BadCoderz.Derma) then
-						return
-					end
-					net.Start("BadCoderz_status_request")
-					net.SendToServer()
-				end)
+				if shouldreopen then
+					timer.Simple(timer_reopen, function()
+						if BadCoderz.Derma and IsValid(BadCoderz.Derma) then
+							return
+						end
+						net.Start("BadCoderz_status_request")
+						net.SendToServer()
+					end)
+					local timer_reopen = BadCoderz.settings.auto_reopen_menu_time:GetInt()
+				end
 				return
 			end
 
@@ -204,8 +245,9 @@ function BadCoderz.ShowUI(ongoingServerScan)
 
 
 	local curcolor = color_SS
+
 	local nbutton = nbutton + 1
-	local buttonServerside = TDLib("DButton", DermaBadCoderz)
+	
 	DermaBadCoderz.buttonServerside = buttonServerside
 	buttonServerside:SetPos(1, holdery + nbutton * buttonh)
 	buttonServerside:SetSize(DermaBadCoderz:GetWide() - mainHolder:GetWide() - holderbordel-1, buttonh)
@@ -216,7 +258,9 @@ function BadCoderz.ShowUI(ongoingServerScan)
 	:FillHover(curcolor)
 	:Text("Server Realm", "BadCoderzFont2", color_black, TEXT_ALIGN_CENTER, 5):CircleClick(color_black)
 
+
 	buttonServerside.DoClick = function(pnl)
+		if serverCompiledFuncsScan then return end
 		pnl.ClickX, pnl.ClickY = pnl:CursorPos()
 		pnl.Rad = 0
 		pnl.Alpha = color_black.a
@@ -224,12 +268,7 @@ function BadCoderz.ShowUI(ongoingServerScan)
 		net.Start("BadCoderz_report_request")
 		net.SendToServer()
 
-		DermaBadCoderz.currentmode = nbutton
 		mainHolder:Clear()
-
-
-
-
 	end
 
 	buttonServerside.UpdateAsync = function(pnl, active, data)
@@ -273,16 +312,19 @@ function BadCoderz.ShowUI(ongoingServerScan)
 
 			local shouldclose = BadCoderz.settings.auto_close_menu:GetBool()
 			local shouldreopen = BadCoderz.settings.auto_reopen_menu:GetBool()
-			if (shouldclose and not active and shouldreopen) then -- test running == true because it was called right before
-				local timer_reopen = BadCoderz.settings.auto_reopen_menu_time:GetInt()
+			if (shouldclose and not active) then -- test running == true because it was called right before
+				
 				DermaBadCoderz:Close()
-				timer.Simple(timer_reopen, function()
-					if BadCoderz.Derma and IsValid(BadCoderz.Derma) then
-						return
-					end
-					net.Start("BadCoderz_status_request")
-					net.SendToServer()
-				end)
+				if shouldreopen then
+					local timer_reopen = BadCoderz.settings.auto_reopen_menu_time:GetInt()
+					timer.Simple(timer_reopen, function()
+						if BadCoderz.Derma and IsValid(BadCoderz.Derma) then
+							return
+						end
+						net.Start("BadCoderz_status_request")
+						net.SendToServer()
+					end)
+				end
 				return
 			end
 
@@ -299,11 +341,32 @@ function BadCoderz.ShowUI(ongoingServerScan)
 	end
 
 
+	nbutton = nbutton + 2
+
+
+
+
+
+	local textCompiledFuncs = TDLib("DPanel", DermaBadCoderz)
+	textCompiledFuncs:SetSize(DermaBadCoderz:GetWide() - mainHolder:GetWide() - holderbordel-1, buttonh)
+	textCompiledFuncs:SetPos(1, holdery + nbutton * buttonh)
+	textCompiledFuncs:ClearPaint()
+	:Text("Misc", "BadCoderzFont2", color_black, TEXT_ALIGN_CENTER, 5)
+
+--[[
+   ____        __  _                 
+  / __ \____  / /_(_)___  ____  _____
+ / / / / __ \/ __/ / __ \/ __ \/ ___/
+/ /_/ / /_/ / /_/ / /_/ / / / (__  ) 
+\____/ .___/\__/_/\____/_/ /_/____/  
+    /_/                              
+ ]]
+
 
 
 
 	local curcolor = color_light_red
-	local nbutton = nbutton + 1
+	nbutton = nbutton + 1
 	local buttonOptions = TDLib("DButton", DermaBadCoderz)
 	DermaBadCoderz.buttonOptions = buttonOptions
 	buttonOptions:SetPos(1, holdery + nbutton * buttonh)
@@ -314,14 +377,14 @@ function BadCoderz.ShowUI(ongoingServerScan)
 	:Background(color_light_grey)
 	:SideBlock(curcolor, 4, LEFT)
 	:FillHover(curcolor)
-	:Text("Options & Misc", "BadCoderzFont1.5", color_black, TEXT_ALIGN_CENTER, 5):CircleClick(color_black)
+	:Text("Options & Exports", "BadCoderzFont1.2", color_black, TEXT_ALIGN_CENTER, 5):CircleClick(color_black)
 
 
 	buttonOptions.DoClick = function(pnl)
 		pnl.ClickX, pnl.ClickY = pnl:CursorPos()
 		pnl.Rad = 0
 		pnl.Alpha = color_black.a
-		DermaBadCoderz.currentmode = nbutton
+
 		mainHolder:Clear()
 		mainHolder:ClearPaint():Background(color_light_grey):SideBlock(curcolor, 6, LEFT)
 
@@ -378,10 +441,7 @@ function BadCoderz.ShowUI(ongoingServerScan)
 				surface.SetDrawColor(150, 150, 255, 255)
 				surface.DrawRect(8, 0, 3, h)
 			end
-			/*
-				lastCSReport
-				LastSSReport
-			*/
+
 			local buttonExportCS = TDLib("DButton", mainHolder)
 			buttonExportCS:SetText("")
 			buttonExportCS:SetSize(500, 60)
@@ -417,6 +477,132 @@ function BadCoderz.ShowUI(ongoingServerScan)
 
 		end
 
+
+	nbutton = nbutton + 1
+
+	local curcolor = color_SS
+
+
+
+
+	DermaBadCoderz.buttonRunStrings = buttonRunStrings
+	buttonRunStrings:SetPos(1, holdery + nbutton * buttonh)
+	buttonRunStrings:SetSize(DermaBadCoderz:GetWide() - mainHolder:GetWide() - holderbordel-1, buttonh)
+	buttonRunStrings:SetText("")
+	buttonRunStrings:ClearPaint()
+
+	:Background(color_light_grey)
+	:SideBlock(curcolor, 4, LEFT)
+	:FillHover(curcolor)
+	:Text("RunStrings", "BadCoderzFont2", color_black, TEXT_ALIGN_CENTER, 5):CircleClick(color_black)
+
+	buttonRunStrings.DoClick = function(pnl)
+		if serverCodeSmellScan or BadCoderz.scanningCodeSmells then return end
+		pnl.ClickX, pnl.ClickY = pnl:CursorPos()
+		pnl.Rad = 0
+		pnl.Alpha = color_black.a
+
+
+		mainHolder:Clear()
+		mainHolder:ClearPaint():Background(color_light_grey):SideBlock(curcolor, 6, LEFT)
+
+
+		local labelProtip = vgui.Create( "DLabel", mainHolder )
+		labelProtip:SetPos( 25, 20 )
+		labelProtip:SetSize( mainHolder:GetWide()-40, 300 )
+		labelProtip:SetText( "You might want to find any suspicious hiden code ran on the fly using RunString and compilestring. As most of this code is ran at the\nstart of the server, you need to enable it for the next reboot as running it right now would be useless.")
+		labelProtip:SetColor(color_black)
+		labelProtip:SetFont("BadCoderzFontSmall")
+		labelProtip:SetContentAlignment(7)
+
+
+		local ClientSideText = TDLib("DPanel", mainHolder)
+		ClientSideText:SetSize(200 , 40)
+		ClientSideText:SetPos(167 , 100)
+		ClientSideText:ClearPaint()
+		:Text("Client Realm", "BadCoderzFont2", color_black, TEXT_ALIGN_CENTER, 5)
+
+
+		local ServerSideText = TDLib("DPanel", mainHolder)
+		ServerSideText:SetSize(200 , 40)
+		ServerSideText:SetPos(mainHolder:GetWide()- 400 , 100)
+		ServerSideText:ClearPaint()
+		:Text("Server Realm", "BadCoderzFont2", color_black, TEXT_ALIGN_CENTER, 5)
+
+
+		local x = 10
+		local w = mainHolder:GetWide()/2-x*2
+		
+
+		BadCoderz.generateDListView(mainHolder, x, 150, w, mainHolder:GetTall()-250, BadCoderz.compiledFuncs, true)
+		BadCoderz.generateDListView(mainHolder, mainHolder:GetWide()-w-x, 150, w, mainHolder:GetTall()-250, nil, false)
+
+
+		local DisclamerText = TDLib("DPanel", mainHolder)
+		DisclamerText:SetSize(800 , 40)
+		DisclamerText:SetPos(300 , 572)
+		DisclamerText:ClearPaint()
+
+		if GLib then
+			DisclamerText:Text("Double click on a line to view the decompiled bytecode.", "BadCoderzFont1.2", color_black, TEXT_ALIGN_LEFT, 5)
+		else
+			DisclamerText:Text("Install GLib to inspect decompiled bytecode (link in console)", "BadCoderzFont1.2", color_black, TEXT_ALIGN_LEFT, 5)
+			print("[BadCoderz] link to download GLib : https://github.com/notcake/glib")
+		end
+
+		if BadCoderz.scanningCompiledFuncs then
+			local buttonStopScanCS = TDLib("DButton", mainHolder)
+			buttonStopScanCS:SetText("")
+			buttonStopScanCS:SetSize(110, 60)
+			buttonStopScanCS:SetPos(135, 592)
+			buttonStopScanCS:ClearPaint():Background(color_CS):Text("STOP", "BadCoderzFont1.5", color_black):CircleClick(color_black)
+
+			buttonStopScanCS.DoClick = function(pnl)
+				pnl.ClickX, pnl.ClickY = pnl:CursorPos()
+				pnl.Rad = 0
+				pnl.Alpha = color_black.a
+				debug.sethook()
+				BadCoderz.scanningCompiledFuncs = false
+				buttonRunStrings:DoClick()
+			end
+		end
+
+		if serverCompiledFuncsScan then
+			local buttonStopScanSS = TDLib("DButton", mainHolder)
+			buttonStopScanSS:SetText("")
+			buttonStopScanSS:SetSize(110, 60)
+			buttonStopScanSS:SetPos(900,592)
+			buttonStopScanSS:ClearPaint():Background(color_SS):Text("STOP", "BadCoderzFont1.5", color_black):CircleClick(color_black)
+			buttonStopScanSS.DoClick = function(pnl)
+				pnl.ClickX, pnl.ClickY = pnl:CursorPos()
+				pnl.Rad = 0
+				pnl.Alpha = color_black.a
+
+				net.Start("BadCoderz_stop_boot_scan")
+				net.SendToServer()
+				serverCompiledFuncsScan = false
+				buttonRunStrings:DoClick()
+			end
+		end
+
+		local CheckBoxScanNextBoot = TDLib( "DCheckBoxLabel", mainHolder )
+		CheckBoxScanNextBoot:SetPos( 880, 60 )
+		CheckBoxScanNextBoot:SetText("")
+		CheckBoxScanNextBoot:SetChecked( scanonreboot )
+		CheckBoxScanNextBoot:SizeToContents()
+		CheckBoxScanNextBoot:SetDark(true)
+		CheckBoxScanNextBoot:ClearPaint():Text("Scan on next boot", "BadCoderzFont1", color_black)
+		CheckBoxScanNextBoot.OnChange = function(_, bool)
+			BadCoderz.prepareCompiledFuncsScanNextReboot(bool)
+			net.Start("BadCoderz_next_reboot_scan_change_status")
+			net.WriteBool(bool)
+			net.SendToServer()
+		end
+
+
+	end
+
+
 	local secretbutton = TDLib("DButton", DermaBadCoderz)
 	secretbutton:SetSize(DermaBadCoderz:GetWide() - mainHolder:GetWide() - holderbordel-1, buttonh)
 	secretbutton:SetPos(1,DermaBadCoderz:GetTall()-buttonh-1)
@@ -434,10 +620,15 @@ function BadCoderz.ShowUI(ongoingServerScan)
 		BadCoderz.Credits()
 	end
 
-	if not ongoingServerScan then
+	-- select which menu to autoopen
+	if BadCoderz.scanningCodeSmells then
 		buttonClientside:DoClick()
-	else
+	elseif serverCodeSmellScan then
 		buttonServerside:DoClick()
+	elseif serverCompiledFuncsScan or BadCoderz.scanningCompiledFuncs then
+		buttonRunStrings:DoClick()
+	else
+		buttonClientside:DoClick() -- I could just remove first condition but i'll keep readability here
 	end
 
 end

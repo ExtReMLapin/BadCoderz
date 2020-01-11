@@ -3,7 +3,6 @@ BadCoderz.GMA_DB = {}
 --[[
 	Documentation here : 
 	https://github.com/Facepunch/garrysmod-requests/issues/1394#issuecomment-524551787
-
 ]]
 
 

@@ -10,7 +10,7 @@
 [Video in french for my fellows baguettes](https://youtu.be/nNvq3CKccic) (Oudated since the video doesn't show GMA path support)
 
 
-## **_How it it different from a profiler ?_**
+## **_How is it different from a profiler ?_**
 
 A profiler doesn't tell you if code is shit so you don't know if there is a good reason for a code to be "slow", here BadCoderz highlights you the shit code of your server and explains you why it's shit.
 

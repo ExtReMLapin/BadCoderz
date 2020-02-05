@@ -1,3 +1,5 @@
+# [Download](https://github.com/ExtReMLapin/BadCoderz/archive/2.0.zip)
+
 # BadCoderz
 ### Find unoptimized addons and KILL the devs who made them
 

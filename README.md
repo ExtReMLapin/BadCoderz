@@ -1,5 +1,7 @@
 # [Download](https://github.com/ExtReMLapin/BadCoderz/archive/2.0.zip)
 
+Anyone telling you this addon reports false-positifs stupid or lying, CANNOT report false positives, just remember to check the number of calls of the reported functions
+
 # BadCoderz
 ### Find unoptimized addons and KILL the devs who made them
 

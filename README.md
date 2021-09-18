@@ -6,6 +6,8 @@ Anyone telling you this addon reports false-positifs is stupid or lying, CANNOT 
 ### Find unoptimized addons and KILL the devs who made them
 
 
+Roasting darkrp """devs""" since 2019
+
 
 [Workshop page](https://steamcommunity.com/sharedfiles/filedetails/?id=1955436281)
 

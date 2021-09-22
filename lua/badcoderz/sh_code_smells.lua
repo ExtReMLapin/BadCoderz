@@ -1,4 +1,5 @@
 local reports = {}
+
 local function do_report(func, hookname, lines, parentFuncs)
 	reports[func] = reports[func] or {}
 	reports[func][hookname] = reports[func][hookname] or {}
@@ -21,19 +22,19 @@ end
 
 local color_red = Color(255, 50, 50)
 
-
 local function fixGMAPath(path)
 	if file.Exists("garrysmod/" .. path, "BASE_PATH") then return path end
 
 	for k, v in pairs(BadCoderz.GMA_DB) do
 		if table.HasValue(v, path) then
 			path = k .. "/" .. path
+
 			return path
 		end
 	end
+
 	return path
 end
-
 
 --[[
 	Some libs like ULib overwrite the hooks functions, so to detect it by locations we need to manually run a hook
@@ -42,46 +43,47 @@ end
 local function initScan()
 	local debugTable
 	local level = 1
+
 	while true do
 		local _debugTable = debug.getinfo(level, "S")
 		if not _debugTable then break end
 		debugTable = _debugTable
 		level = level + 1
 	end
+
 	assert(debugTable, "What the fuck did you do to the hook system ?")
 	BadCoderz.potentialsHooksFiles[debugTable.source:sub(2)] = true
 	hook.Remove("Think", "badCoderzTrapHook")
 end
 
+local hookNames = {
+	name = true,
+	event_name = true
+}
+
 local function _hook()
 	local curStackLevel = 2
 	local calledFunc = debug.getinfo(curStackLevel, "f").func
-
-	if not BadCoderz.heavy_funcs[calledFunc] then
-		return
-	end
-
+	if not BadCoderz.heavy_funcs[calledFunc] then return end
 	--threats functions like Color/Angle/Vector in a different way since the way it's called matters
 	local heavyObject = BadCoderz.heavy_funcs_objects[calledFunc]
+
 	if heavyObject then
 		local callingContext = debug.getinfo(curStackLevel + 1, "fSl")
 		if callingContext.what == "C" then return end -- C could be calling it for some reason
 		local callingContextFunc = callingContext.func
-
 		local found = BadCoderz.find_call_static_args(callingContextFunc, heavyObject, callingContext.currentline)
-		if not found then
-			return
-		end
-
+		if not found then return end
 	end
-
 
 	local level = 0
 	traceTable = {}
+
 	while true do
 		local debugTable = debug.getinfo(level, "Sl")
 		if not debugTable then break end
 		level = level + 1
+
 		-- already got level++'ed, don't do it again here
 		traceTable[level] = {
 			location = debugTable.source:sub(2),
@@ -98,8 +100,8 @@ local function _hook()
 	local foundName
 
 	if name == "self" then
-
 		local func = debug.getinfo(topStack - 1, "f").func
+
 		if value == gmod.GetGamemode() then
 			for k, v in pairs(value) do
 				if not isfunction(v) then continue end
@@ -109,6 +111,7 @@ local function _hook()
 					break
 				end
 			end
+
 			if foundName and BadCoderz.dangerous_hooks[foundName] then
 				foundHookContext = "GM:" .. foundName
 				foundhookLevel = topStack - 1
@@ -149,18 +152,18 @@ local function _hook()
 			end
 		else
 			print("Var type " .. type(value) .. " is not implemented in BadCoderz, pls tell the dev")
+
 			return
 		end
 	elseif BadCoderz.potentialsHooksFiles[stackData.location] then
 		local hookStackLevel = topStack - 1
 		local i = 1
 
-
 		while (true) do
 			local _name, _value = debug.getlocal(hookStackLevel, i)
 			if (_name == nil) then break end
 
-			if _name == "name" then
+			if hookNames[_name] == true then
 				foundName = _value
 				break
 			end
@@ -188,11 +191,17 @@ local function _hook()
 
 	while (foundhookLevel >= targetStackLevel) do
 		local data = debug.getinfo(foundhookLevel, "lSf")
+
 		if data.currentline == -1 then
 			foundhookLevel = foundhookLevel - 1
 			continue
 		end
-		local infoline = {location = fixGMAPath(data.source:gsub("^@", "")), line = data.currentline}
+
+		local infoline = {
+			location = fixGMAPath(data.source:gsub("^@", "")),
+			line = data.currentline
+		}
+
 		table.insert(lines, infoline)
 		table.insert(functions, data.func)
 		foundhookLevel = foundhookLevel - 1
@@ -201,12 +210,11 @@ local function _hook()
 	do_report(BadCoderz.heavy_funcs[calledFunc], foundHookContext, lines, functions)
 end
 
-
 local function start_scan()
+	print("started scan")
 	jit.off()
 	-- you also need to flush the jit cache because it may miss something if one day LuaJIT stitching gets jitted with black magic
 	jit.flush()
-
 	hook.Add("Think", "badCoderzTrapHook", initScan)
 	BadCoderz.scanningCodeSmells = true
 	reports = {}
@@ -214,6 +222,7 @@ local function start_scan()
 	if CLIENT and gui.IsConsoleVisible() then
 		MsgC(color_red, "PLEASE CLOSE THE CONSOLE TO RUN ALL CLIENTS CHECKS\n")
 	end
+
 	debug.sethook(_hook, "c") -- hook functions calls
 end
 
@@ -230,5 +239,3 @@ function BadCoderz.toggleCodeSmellsScan()
 		stop_scan()
 	end
 end
-
-

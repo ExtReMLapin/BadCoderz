@@ -18,15 +18,11 @@ BadCoderz.heavy_funcs = {
 	[Color] = "Color",
 	[Vector] = "Vector",
 	[Angle] = "Angle",
-	--[[
-	candidates for "dumb fuckers" update :
-	CompileString
-	RunString
-	RunStringEx
-	ents.Create
-	surface.CreateFont
-	table.HasValue
-	]]
+	[CompileString] = "CompileString",
+	[RunString] = "RunString",
+	[RunStringEx] = "RunStringEx",
+	[table.HasValue] = "table.HasValue",
+
 }
 
 -- bool is represending a required(true) knum/kshort or an optional one (false), it's used when inspecting the bytecode

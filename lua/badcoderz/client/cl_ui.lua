@@ -218,6 +218,7 @@ function BadCoderz.ShowUI(serverCodeSmellScan, serverCompiledFuncsScan, scanonre
 			if (shouldclose and BadCoderz.scanningCodeSmells) then --  == true because it was called right before
 				DermaBadCoderz:Close()
 				if shouldreopen then
+					local timer_reopen = BadCoderz.settings.auto_reopen_menu_time:GetInt()
 					timer.Simple(timer_reopen, function()
 						if BadCoderz.Derma and IsValid(BadCoderz.Derma) then
 							return
@@ -225,7 +226,7 @@ function BadCoderz.ShowUI(serverCodeSmellScan, serverCompiledFuncsScan, scanonre
 						net.Start("BadCoderz_status_request")
 						net.SendToServer()
 					end)
-					local timer_reopen = BadCoderz.settings.auto_reopen_menu_time:GetInt()
+					
 				end
 				return
 			end

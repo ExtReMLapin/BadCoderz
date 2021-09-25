@@ -1,7 +1,6 @@
 local function openWikipage(func_name)
-	func_name = string.Replace(func_name,".","/")
-	func_name = string.Replace(func_name,":","/")
-	gui.OpenURL("https://wiki.garrysmod.com/page/" .. func_name)
+
+	gui.OpenURL("https://wiki.facepunch.com/gmod/" .. func_name)
 	--input.SetCursorPos(ScrW()/2+239, ScrH()/2+34) -- hackerman
 end
 
@@ -14,7 +13,7 @@ local disclamer = [[
 local preloaded_data = file.Read("garrysmod/lua/send.txt", "BASE_PATH")
 
 
-local wiki_base = "https://wiki.garrysmod.com/page/"
+local wiki_base = "https://wiki.facepunch.com/gmod/"
 function BadCoderz.reportToText(dataTbl)
 
 	if table.IsEmpty(dataTbl) then
@@ -23,13 +22,13 @@ function BadCoderz.reportToText(dataTbl)
 
 	local str = disclamer
 	for functionsNames, hookTable in pairs(dataTbl) do
-		local function_internet_name = string.Replace(functionsNames,".","/")
-		if not string.find(function_internet_name, '/',1,  true) then
-			function_internet_name = "Global/" .. function_internet_name
+		local function_internet_name = functionsNames--string.Replace(functionsNames,".","/")
+		if not string.find(function_internet_name, '.',1,  true) then
+			function_internet_name = "Global." .. function_internet_name
 		end
 		str = str .. "\nFunction : " .. functionsNames .. " (Wiki page : " .. wiki_base .. function_internet_name .. " )\n"
 		for hookName, callsLocations in pairs(hookTable) do
-			local hook_internet_name = string.Replace(hookName,":","/")
+			local hook_internet_name = hookName--string.Replace(hookName,":","/")
 			str = str .. "	Hook : " .. hookName .. " (Wiki page : " .. wiki_base .. hook_internet_name .. " )\n"
 			for filename, LinesTable in pairs(callsLocations) do
 				local warning;
@@ -61,13 +60,15 @@ end
 
 
 local function getDescFromWikiBody(body)
+	body = util.JSONToTable(body).html
 
-	local tofind = ">Description</span></h1>"
+
+	local tofind = "function_description section"
 
 	if not string.find(body, tofind) then
 		return ""
 	end
-	local found = string.find(body, tofind) + string.len(tofind) + 4
+	local found = string.find(body, tofind) + string.len(tofind) + 5
 	local enddesc = string.find(body, ".", found, true)
 	local tip = string.sub(body, found, enddesc)
 	tip = string.gsub(tip, "<.->", "")
@@ -96,9 +97,9 @@ function BadCoderz.populateTreeWithData(treePanel, dataTbl, client)
 
 	for functionsNames, hookTable in pairs(dataTbl) do
 			local nodeFunctionName = treePanel:AddNode( functionsNames , "icon16/sitemap.png")
-			local function_internet_name = string.Replace(functionsNames,".","/")
-			if not string.find(function_internet_name, '/',1,  true) then
-				function_internet_name = "Global/" .. function_internet_name
+			local function_internet_name = functionsNames--string.Replace(functionsNames,".","/")
+			if not string.find(function_internet_name, '.',1,  true) then
+				function_internet_name = "Global." .. function_internet_name
 			end
 
 			nodeFunctionName:SetExpanded(true, true)
@@ -109,11 +110,12 @@ function BadCoderz.populateTreeWithData(treePanel, dataTbl, client)
 			if BadCoderz.toolTips[fName] then
 				nodeFunctionName:SetTooltip(BadCoderz.toolTips[fName])
 			end
-			http.Fetch("https://wiki.garrysmod.com/page/" .. function_internet_name,function(body)
+
+			http.Fetch("https://wiki.facepunch.com/gmod/" .. function_internet_name.. "?format=json",function(body)
 				if nodeFunctionName and IsValid(nodeFunctionName) then
 					local tip = getDescFromWikiBody(body)
 					if BadCoderz.toolTips[fName] then
-						tip = tip .. "\n" .. BadCoderz.toolTips[fName]
+						tip = tip .. "\n-------------------\n" .. BadCoderz.toolTips[fName]
 					end
 
 					nodeFunctionName:SetTooltip(tip)
@@ -122,9 +124,9 @@ function BadCoderz.populateTreeWithData(treePanel, dataTbl, client)
 
 			for hookName, callsLocations in pairs(hookTable) do
 				local nodeHookName = nodeFunctionName:AddNode( hookName , "icon16/wrench.png")
-				local hook_internet_name = string.Replace(hookName,":","/")
+				local hook_internet_name = hookName--string.Replace(hookName,":","/")
 				nodeHookName:SetTooltip("Loading ...")
-				http.Fetch("https://wiki.garrysmod.com/page/" .. hook_internet_name,function(body)
+				http.Fetch("https://wiki.facepunch.com/gmod/" .. hook_internet_name.. "?format=json",function(body)
 					if nodeHookName and IsValid(nodeHookName) then
 						nodeHookName:SetTooltip(getDescFromWikiBody(body))
 					end

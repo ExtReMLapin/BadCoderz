@@ -92,7 +92,7 @@ Obviously, there might be some "false positive" detections, but with common sens
 
 ## _I got a short memory, can you explain me quickly the difference between a profiler and this ?_
 
-A profiler find CPU intensive functions without knowing if they are actually coded like shit, this addon find all the function coded like shit.
+A profiler finds CPU intensive functions without knowing if they are actually coded like shit, this addon finds all the functions coded like shit.
 
 Then you can actually blame the dev who coded it for making shit code.
 
@@ -104,11 +104,11 @@ Optimized doesn't mean being fast, optimized means being efficient.
 
 Here is a non-exhaustive list :
 
-*   Server owner : His server is lagging, his players are leaving or complaining, he want to fire his server dev, but since he is his brother-in-law he need evidences.
+*   Server owner : His server is lagging, his players are leaving or complaining, he want to fire his server dev, but since he is his brother-in-law he need evidence.
 
-*   Server owner 2 : His server is lagging and he want to find what addon is coded like ass.
+*   Server owner 2 : His server is lagging and he wants to find which addon is coded like ass.
 
-*   Junior Lua dev releasing his first addon : He want to be sure he didn't do anything that would destroy the server performances.
+*   Junior Lua dev releasing his first addon : He wants to be sure he didn't do anything that would destroy the server performance.
 
 ## _Anything else i should know ?_
 

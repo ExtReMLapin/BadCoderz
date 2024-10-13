@@ -1,4 +1,5 @@
 
+![BadCoderz Blue](https://github.com/user-attachments/assets/9f2d930c-8fa1-4992-bf73-8282f590a05b)
 
 
 Anyone telling you this addon reports false-positifs is stupid or lying, CANNOT report false positives, just remember to check the number of calls of the reported functions

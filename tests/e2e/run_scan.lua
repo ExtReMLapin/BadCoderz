@@ -9,6 +9,7 @@
 if BadCoderz.scanningCodeSmells then BadCoderz.toggleCodeSmellsScan() end
 
 TDD = { done = false, entries = {}, hasValueCalls = 0 }
+_G.traceTable = nil -- reliquat éventuel d'une ancienne version chargée dans cette session de jeu
 
 local N_ADDONS, N_FILES = 150, 400
 local SCAN_SECONDS = 2
@@ -65,8 +66,9 @@ end)
 
 timer.Simple(0.1 + SCAN_SECONDS, function()
 	BadCoderz.toggleCodeSmellsScan() -- stop
-	-- hygiène du test : on remet le hook du harnais (c'est ce que stop_scan devrait faire lui-même)
-	debug.sethook(hookFn, hookMask or "", hookCount or 0)
+	-- stop_scan doit avoir remis le hook du harnais lui-même (bug #1)
+	TDD.hookRestored = (debug.gethook()) == hookFn
+	if not TDD.hookRestored then debug.sethook(hookFn, hookMask or "", hookCount or 0) end -- hygiène du test
 
 	for _, id in ipairs({ "tdd_direct", "tdd_coroutine", "tdd_dyncolor", "tdd_tailcolor", "tdd_staticcolor" }) do
 		hook.Remove("Think", id)

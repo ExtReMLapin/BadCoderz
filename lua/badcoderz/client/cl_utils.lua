@@ -10,7 +10,10 @@ local disclamer = [[
 	Check the call stack, because the real location of the function is in it.
 	Of course, if you know a bit about lua, you should be able to spot the addons with A LOT of code smell/bad things.
 ]]
-local preloaded_data = file.Read("garrysmod/lua/send.txt", "BASE_PATH")
+-- BUG #13 : file.Read returns nil when send.txt is missing and string.find(nil, ...) then raised an error
+-- (in reportToText and in the report tree). An empty string means "nothing is flagged as probably wrong".
+-- local preloaded_data = file.Read("garrysmod/lua/send.txt", "BASE_PATH")
+local preloaded_data = file.Read("garrysmod/lua/send.txt", "BASE_PATH") or ""
 
 
 local wiki_base = "https://wiki.facepunch.com/gmod/"

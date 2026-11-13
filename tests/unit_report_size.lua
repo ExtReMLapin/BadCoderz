@@ -27,6 +27,8 @@ return {
 			for f = 1, 6 do frames[f] = { location = "lua/" .. randomHex(30) .. ".lua", line = math.random(1, 5000) } end
 			byLoc[loc][math.random(1, 5000)] = { calls = math.random(1, 100000), lines = frames, funcs = {} }
 		end
+		-- l'entrée la plus appelée de loin : elle doit survivre à toute troncature
+		byLoc["lua/tdd_top.lua"] = { [42] = { calls = 999999999, lines = { { location = "lua/tdd_top.lua", line = 42 } }, funcs = {} } }
 		reports["ents.GetAll"] = { ["GM:Think"] = byLoc }
 	end,
 	afterAll = function()
@@ -50,6 +52,44 @@ return {
 				local ok, err = pcall(BadCoderz.WriteReport, ply)
 				-- RED attendu : error("Report is too big :(")
 				expect(ok and "" or tostring(err)).to.equal("")
+			end,
+		},
+		{
+			name = "#3 GetNetReport existe",
+			func = function()
+				expect(BadCoderz.GetNetReport).to.exist()
+			end,
+		},
+		{
+			name = "#3 GetNetReport : un gros rapport est tronqué sous la limite réseau et signalé comme tel",
+			func = function()
+				local data, truncated = BadCoderz.GetNetReport()
+				expect(#data).to.beLessThan(64001)
+				expect(truncated).to.beTrue()
+			end,
+		},
+		{
+			name = "#3 GetNetReport : la troncature garde les entrées les plus appelées",
+			func = function()
+				local data = BadCoderz.GetNetReport()
+				local sent = util.JSONToTable(util.Decompress(data))
+				local top = sent["ents.GetAll"]["GM:Think"]["lua/tdd_top.lua"]
+				expect(top).to.exist()
+				expect(top[42] or top["42"]).to.exist()
+			end,
+		},
+		{
+			name = "#3 GetNetReport : un petit rapport n'est ni modifié ni signalé comme tronqué",
+			func = function()
+				local reports = BadCoderz.getReport()
+				for k in pairs(reports) do reports[k] = nil end
+				reports["ents.GetAll"] = { ["GM:Think"] = { ["lua/a.lua"] = { [1] = { calls = 3, lines = { { location = "lua/a.lua", line = 1 } }, funcs = {} } } } }
+
+				local data, truncated = BadCoderz.GetNetReport()
+				expect(truncated).to.beFalse()
+				local sent = util.JSONToTable(util.Decompress(data))
+				local entry = sent["ents.GetAll"]["GM:Think"]["lua/a.lua"]
+				expect((entry[1] or entry["1"]).calls).to.equal(3)
 			end,
 		},
 	},

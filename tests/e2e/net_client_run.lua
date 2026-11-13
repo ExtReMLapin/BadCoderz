@@ -16,7 +16,7 @@ local steps = {
 		net.WriteString("badcoderz/sh_data.lua")
 		net.WriteString("lua/badcoderz/sh_data.lua")
 		net.WriteBool(true)
-		net.WriteUInt(9000, 13)
+		net.WriteUInt(9000, BadCoderz.NET_LINE_BITS or 13) -- largeur du champ « ligne » de l'addon (13 avant correction)
 		net.WriteBool(true) -- client
 		net.SendToServer()
 	end,
@@ -34,13 +34,13 @@ local steps = {
 		net.WriteString("badcoderz/sh_data.lua")
 		net.WriteString("lua/badcoderz/sh_data.lua")
 		net.WriteBool(true)
-		net.WriteUInt(10, 13)
+		net.WriteUInt(10, BadCoderz.NET_LINE_BITS or 13)
 		net.WriteBool(false) -- client = false -> lecture du rapport serveur
 		net.WriteString("ents.GetAll")
 		net.WriteString("GM:Think")
 		net.WriteString("lua/inexistant.lua")
-		net.WriteUInt(1, 13)
-		net.WriteUInt(1, 8)
+		net.WriteUInt(1, BadCoderz.NET_LINE_BITS or 13)
+		net.WriteUInt(1, BadCoderz.NET_STACK_BITS or 8)
 		net.SendToServer()
 	end,
 	-- D : cl_utils.lua:285-286, décompilation d'une fonction compilée

@@ -7,6 +7,7 @@ https://gist.github.com/meepen/807dd81a572ffb0f28a8c44c04922fdd
 
 ]]
 
+-- Fallback opcode numbers, only used if the runtime probe below fails (see detect_opcodes).
 local instructions_db;
 
 if jit.version_num < 20100 then
@@ -29,6 +30,149 @@ else -- bytecode changes
 	}
 end
 
+--[[
+	BUG #17 / #11 : jit.util.funck and jit.util.funcuvname are disabled by Facepunch ("disabled due to security
+	concerns", https://wiki.facepunch.com/gmod/jit.util.funck) and return nothing, so the old analysis (kept,
+	commented, at the bottom of this file) could never read the name of the called function and therefore never
+	detected any static Color/Vector/Angle call.
+
+	New approach, which needs neither constants nor names: the profiler hook already knows WHICH function was
+	called (Color, Vector, Angle), so the only thing left to check is whether the arguments of the CALL
+	instruction at the given line are all loaded by KSHORT/KNUM instructions, i.e. are compile-time constants.
+	jit.util.funcbc (still enabled) is enough for that.
+
+	Known limit : we cannot tell WHICH call of a line was executed (the frame's pc is not exposed), so a line that
+	holds both a static and a dynamic call to the same constructor is reported as static.
+]]
+
+-- Opcode numbers are derived at load time from a probe function instead of being hardcoded per LuaJIT version.
+-- Returns nil if the probe does not look like what we expect (then we keep the fallback table above).
+local function detect_opcodes()
+	local probe = CompileString("local F = ... local a = F(255, 0, 0) local b = F(1.5, 2.5, 3.5) return F(1, 2, 3)", "badcoderz_opcode_probe")
+	if not isfunction(probe) then return nil end
+
+	local ops = {}
+	local pc = 0
+	while true do
+		local ins = jit.util.funcbc(probe, pc)
+		if not ins then break end
+		ops[pc] = bit.band(ins, 0xFF)
+		pc = pc + 1
+	end
+
+	-- expected layout (pc 0 is the function header, pc 1 is VARG/MOV for `...`, hence we search by pattern)
+	-- ... KSHORT KSHORT KSHORT CALL ... KNUM KNUM KNUM CALL ... KSHORT KSHORT KSHORT CALLT
+	local last = pc - 1
+	local callt = ops[last]
+	local found
+	for i = 1, last - 1 do
+		local k1, k2, k3, call = ops[i], ops[i + 1], ops[i + 2], ops[i + 3]
+		if k1 and k1 == k2 and k2 == k3 and call and call ~= k1 then
+			found = found or {}
+			found[#found + 1] = { k = k1, call = call }
+		end
+	end
+	if not found or #found < 3 then return nil end
+
+	local kshort, call = found[1].k, found[1].call
+	local knum = found[2].k
+	if found[2].call ~= call or found[3].k ~= kshort or found[3].call ~= callt then return nil end
+	if kshort == knum or call == callt then return nil end
+
+	return { KSHORT = kshort, KNUM = knum, CALL = call, CALLT = callt }
+end
+
+local opcodes = detect_opcodes()
+
+if not opcodes then
+	-- CALLT follows CALL by two in every LuaJIT version (CALLM, CALL, CALLMT, CALLT)
+	opcodes = {
+		KSHORT = instructions_db.KSHORT,
+		KNUM = instructions_db.KNUM,
+		CALL = instructions_db.CALL,
+		CALLT = instructions_db.CALL + 2
+	}
+	print("BadCoderz : opcode probe failed, falling back to the hardcoded LuaJIT " .. tostring(jit.version) .. " opcode table")
+end
+
+-- Disassembly cache (BUG #8 : the old code disassembled the whole calling function again on every single hit).
+-- Weak keys : we never keep a function alive just because we analysed it.
+local disassembly_cache = setmetatable({}, { __mode = "k" })
+
+-- Only keeps what the analysis needs : for each CALL/CALLT, its pc and argument count, plus the opcode of every pc.
+local function disassemble_function(fn)
+	local cached = disassembly_cache[fn]
+	if cached then return cached end
+
+	local ops = {}
+	local registers = {}
+	local calls = {}
+	local pc = 1 -- pc 0 is the function header
+	while true do
+		local ins = jit.util.funcbc(fn, pc)
+		if not ins then break end
+		local op = bit.band(ins, 0xFF)
+		ops[pc] = op
+		registers[pc] = bit.rshift(bit.band(ins, 0x0000ff00), 8) -- operand A
+
+		if op == opcodes.CALL then
+			-- CALL A B C : C - 1 arguments
+			calls[#calls + 1] = { pc = pc, nargs = bit.rshift(bit.band(ins, 0x00ff0000), 16) - 1 }
+		elseif op == opcodes.CALLT then
+			-- CALLT A D : D - 1 arguments
+			calls[#calls + 1] = { pc = pc, nargs = bit.rshift(ins, 16) - 1 }
+		end
+
+		pc = pc + 1
+	end
+
+	cached = { ops = ops, registers = registers, calls = calls }
+	disassembly_cache[fn] = cached
+	return cached
+end
+
+-- `definition` is an entry of BadCoderz.heavy_funcs_objects : { names, { true, true, true, false } }
+-- (true = required numeric argument, false = optional one). `names` is not needed anymore (see above).
+-- Returns true if a call on `expectedLine` has between min and max arguments that are all numeric constants.
+function BadCoderz.find_call_static_args(fn, definition, expectedLine)
+	local minNums = 0
+	local maxNums = 0
+	for _, v in ipairs(definition[2]) do
+		if v == true then
+			minNums = minNums + 1
+		end
+		maxNums = maxNums + 1
+	end
+
+	local disassembled = disassemble_function(fn)
+	local ops, registers = disassembled.ops, disassembled.registers
+
+	for _, call in ipairs(disassembled.calls) do
+		local nargs, pc = call.nargs, call.pc
+
+		if nargs >= minNums and nargs <= maxNums and pc - nargs >= 1 then
+			-- every argument must come from a KSHORT/KNUM, loaded in consecutive registers right before the call
+			local allStatic = true
+			for j = pc - nargs, pc - 1 do
+				local op = ops[j]
+				if (op ~= opcodes.KSHORT and op ~= opcodes.KNUM) or (j > pc - nargs and registers[j] ~= registers[j - 1] + 1) then
+					allStatic = false
+					break
+				end
+			end
+
+			if allStatic and jit.util.funcinfo(fn, pc).currentline == expectedLine then return true end
+		end
+	end
+
+	return false, "no call with only constant arguments on this line"
+end
+
+-- ---------------------------------------------------------------------------------------------------------------
+-- OLD IMPLEMENTATION (kept for reference, disabled). It relied on jit.util.funck / jit.util.funcuvname, which
+-- Facepunch disabled, and it leaked the globals `n` (BUG #12) and re-disassembled the function on every call (#8).
+-- ---------------------------------------------------------------------------------------------------------------
+--[==[
 local function disassemble_function(fn)
 	local upvalues = {}
 	n = 0
@@ -150,3 +294,4 @@ function BadCoderz.find_call_static_args(fn, definition, expectedLine)
 
 	return false, "didnt find shit"
 end
+]==]

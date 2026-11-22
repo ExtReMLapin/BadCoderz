@@ -22,7 +22,10 @@ function BadCoderz.prepareCompiledFuncsScanNextReboot(bEnable)
 end
 
 
-local ignored_funcs = {} -- rip garbage collection
+-- BUG #6 : this was a plain table (`rip garbage collection`) : every function called while the boot scan was active
+-- was kept alive forever, closures included. Weak keys : being ignored must not keep a function in memory.
+-- local ignored_funcs = {} -- rip garbage collection
+local ignored_funcs = setmetatable({}, { __mode = "k" })
 
 local settings = {
 	detectFakePath = true -- detecting fuckers doing RunString("bluh blug", "lua/legit_lua_file.lua")

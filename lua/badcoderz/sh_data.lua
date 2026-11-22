@@ -1,5 +1,11 @@
 BadCoderz.scanningCodeSmells = BadCoderz.scanningCodeSmells or false
 
+-- Width in bits of the network fields shared by the client and the server (BUG #4).
+-- Lines used to be written on 13 bits (max 8191 : any file with more lines came back with a wrong line number)
+-- and the position in the call stack on 8 bits (max 255).
+BadCoderz.NET_LINE_BITS = 24
+BadCoderz.NET_STACK_BITS = 16
+
 BadCoderz.heavy_funcs = {
 	[player.GetAll] = "player.GetAll",
 	[ents.GetAll] = "ents.GetAll",

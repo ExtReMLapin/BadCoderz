@@ -10,7 +10,10 @@ local disclamer = [[
 	Check the call stack, because the real location of the function is in it.
 	Of course, if you know a bit about lua, you should be able to spot the addons with A LOT of code smell/bad things.
 ]]
-local preloaded_data = file.Read("garrysmod/lua/send.txt", "BASE_PATH")
+-- BUG #13 : file.Read returns nil when send.txt is missing and string.find(nil, ...) then raised an error
+-- (in reportToText and in the report tree). An empty string means "nothing is flagged as probably wrong".
+-- local preloaded_data = file.Read("garrysmod/lua/send.txt", "BASE_PATH")
+local preloaded_data = file.Read("garrysmod/lua/send.txt", "BASE_PATH") or ""
 
 
 local wiki_base = "https://wiki.facepunch.com/gmod/"
@@ -213,14 +216,17 @@ function BadCoderz.populateTreeWithData(treePanel, dataTbl, client)
 								net.WriteString(fixedName)
 								net.WriteString(location.location)
 								net.WriteBool(true)
-								net.WriteUInt(location.line,13)
+								-- net.WriteUInt(location.line,13) -- BUG #4 : 13 bits = lines up to 8191 only
+								net.WriteUInt(location.line, BadCoderz.NET_LINE_BITS)
 								net.WriteBool(client)
 								if not client then
 									net.WriteString(functionsNames)
 									net.WriteString(hookName)
 									net.WriteString(filename)
-									net.WriteUInt(callLines, 13)
-									net.WriteUInt(k, 8)
+									-- net.WriteUInt(callLines, 13)
+									-- net.WriteUInt(k, 8)
+									net.WriteUInt(callLines, BadCoderz.NET_LINE_BITS)
+									net.WriteUInt(k, BadCoderz.NET_STACK_BITS)
 								end
 								net.SendToServer()
 							end

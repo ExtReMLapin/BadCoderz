@@ -22,6 +22,12 @@ end
 
 local color_red = Color(255, 50, 50)
 
+--[[
+	OLD VERSION (disabled) : for every frame of every reported call it did a file.Exists and then a
+	table.HasValue over the file list of EVERY mounted GMA (BUG #7 : 150 addons x 2 frames x each hit = tens of
+	thousands of linear scans per second, while profiling code that is itself being called every frame).
+	When a file was present in several GMAs the winner also depended on the iteration order of pairs().
+
 local function fixGMAPath(path)
 	if file.Exists("garrysmod/" .. path, "BASE_PATH") then return path end
 
@@ -34,6 +40,51 @@ local function fixGMAPath(path)
 	end
 
 	return path
+end
+]]
+
+-- NEW VERSION : a reverse index file -> GMA built once, and a per-path cache of the final answer.
+-- The index is rebuilt when BadCoderz.GMA_DB is replaced, and at the start of every scan.
+local gmaIndexSource -- the GMA_DB table the index was built from
+local gmaIndex = {} -- "lua/foo/bar.lua" -> "addons/xxx.gma"
+local gmaPathCache = {} -- path given by the debug library -> path shown in the report
+
+local function rebuildGMAIndex()
+	gmaIndexSource = BadCoderz.GMA_DB
+	gmaIndex = {}
+	gmaPathCache = {}
+
+	for gma, files in pairs(gmaIndexSource) do
+		for _, filePath in ipairs(files) do
+			local known = gmaIndex[filePath]
+
+			-- the same file can exist in several GMAs : keep the smallest name so the result is deterministic
+			if known == nil or gma < known then
+				gmaIndex[filePath] = gma
+			end
+		end
+	end
+end
+
+local function fixGMAPath(path)
+	if gmaIndexSource ~= BadCoderz.GMA_DB then rebuildGMAIndex() end
+
+	local cached = gmaPathCache[path]
+	if cached then return cached end
+
+	local fixed = path
+
+	if not file.Exists("garrysmod/" .. path, "BASE_PATH") then
+		local gma = gmaIndex[path]
+
+		if gma then
+			fixed = gma .. "/" .. path
+		end
+	end
+
+	gmaPathCache[path] = fixed
+
+	return fixed
 end
 
 --[[
@@ -77,7 +128,9 @@ local function _hook()
 	end
 
 	local level = 0
-	traceTable = {}
+	-- BUG #12 : this used to be a global (`traceTable = {}`) that leaked into _G and made the hook non reentrant
+	-- traceTable = {}
+	local traceTable = {}
 
 	while true do
 		local debugTable = debug.getinfo(level, "Sl")
@@ -210,14 +263,25 @@ local function _hook()
 	do_report(BadCoderz.heavy_funcs[calledFunc], foundHookContext, lines, functions)
 end
 
+-- What was in place before the scan started, so that stopping it puts everything back (BUG #1 and #14).
+-- There is only ONE debug hook slot per thread : the "scan RunString at boot" hook (sh_compiled_functions.lua),
+-- profilers or debuggers may already be using it.
+local previousHook = {}
+local jitWasOn = true
+
 local function start_scan()
 	print("started scan")
+	-- remember the state we are about to overwrite
+	jitWasOn = jit.status()
+	previousHook.func, previousHook.mask, previousHook.count = debug.gethook()
+
 	jit.off()
 	-- you also need to flush the jit cache because it may miss something if one day LuaJIT stitching gets jitted with black magic
 	jit.flush()
 	hook.Add("Think", "badCoderzTrapHook", initScan)
 	BadCoderz.scanningCodeSmells = true
 	reports = {}
+	rebuildGMAIndex() -- GMA_DB may have changed since the last scan (BUG #7 : the index is cached)
 
 	if CLIENT and gui.IsConsoleVisible() then
 		MsgC(color_red, "PLEASE CLOSE THE CONSOLE TO RUN ALL CLIENTS CHECKS\n")
@@ -227,9 +291,18 @@ local function start_scan()
 end
 
 local function stop_scan()
-	jit.on()
+	-- BUG #14 : jit.on() used to be called unconditionally, even if the JIT was off before the scan
+	-- jit.on()
+	if jitWasOn then
+		jit.on()
+	end
+
 	BadCoderz.scanningCodeSmells = false
-	debug.sethook(_hook, "")
+	hook.Remove("Think", "badCoderzTrapHook") -- the trap is useless (and stays registered) if the scan is stopped before the first Think
+
+	-- BUG #1 : this used to disable every hook, destroying the one that was active before the scan
+	-- debug.sethook(_hook, "")
+	debug.sethook(previousHook.func, previousHook.mask or "", previousHook.count or 0)
 end
 
 function BadCoderz.toggleCodeSmellsScan()

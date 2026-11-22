@@ -2,7 +2,13 @@
 ![BadCoderz Blue](https://github.com/user-attachments/assets/9f2d930c-8fa1-4992-bf73-8282f590a05b)
 
 
-Anyone telling you this addon reports false-positifs is stupid or lying, CANNOT report false positives, just remember to check the number of calls of the reported functions
+<!-- Original wording (kept): Anyone telling you this addon reports false-positifs is stupid or lying, CANNOT report false positives, just remember to check the number of calls of the reported functions -->
+The scan is dynamic: it only reports calls that were really executed while it was running, so check the number of calls of the reported functions.
+
+Known limits, so you are not surprised:
+* `Color`/`Vector`/`Angle` with static arguments are found by looking at the bytecode of the calling line (Garry's Mod disabled `jit.util.funck`, so names can't be read anymore). If one line contains both a static call and a dynamic call to the same constructor, the line is reported as static.
+* A `return Color(255, 0, 0)` written as a tail call can't be attributed (the calling function is not on the stack anymore).
+* Code running inside a coroutine is not scanned (Lua debug hooks are per thread).
 
 # BadCoderz
 ### Find unoptimized addons and KILL the devs who made them
